@@ -108,7 +108,7 @@ def data_plot(df):
         font_color  = "black",
         title_font_family = "Courier New",
         title_font_size = 28)
-    fig.show()
+    # fig.show()
 
 '''
 Scatter plots of the different weather datasets to the IC admissions of the
@@ -177,7 +177,7 @@ def scatter_plot(df, method):
     fig_2.update_yaxes(title_text="24-hour sum of precipitation", row=3, col=1)
     fig_2.update_yaxes(title_text="24-hour average relative humidity", row=3, col=2)
 
-    fig_2.show()
+    # fig_2.show()
 
 def correlation_matrix(df, method):
     corr = df.corr(method = method)
@@ -199,7 +199,7 @@ def correlation_matrix(df, method):
         ),
         xaxis_showgrid = False,
         yaxis_showgrid = False)
-    fig_3.show()
+    # fig_3.show()
 
 df_IC, df_weather, df, df_second_wave = data_loader()
 

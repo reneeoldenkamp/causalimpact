@@ -348,16 +348,25 @@ class CausalImpact:
 
         # Parse <model_args>, fill gaps using <_defaults>
 
+        # Added level, season, season_freq
+        # Season_freq is a list with dictonaries, each dictonary has period and harmonic for a season
+        # Think can delete nseasons and season_duration?
+        # Also added these in model.py r67 as ss argument for statsmodel unobservedComponent
         _defaults = {
             "ndraws": 1000,
             "nburn": 100,
             "niter": 1000,
             "standardize_data": True,
             "prior_level_sd": 0.01,
+            "level": False,
+            "trend": False,
             "nseasons": 1,
             "season_duration": 1,
+            "seasonal": None,
+            "freq_seasonal": None,
             "dynamic_regression": False,
         }
+        print(model_args, "HALLOOOOOOOOOOOOOOOOOOOOOO")
 
         if model_args is None:
             model_args = _defaults
@@ -365,7 +374,7 @@ class CausalImpact:
             missing = [key for key in _defaults if key not in model_args]
             for arg in missing:
                 model_args[arg] = _defaults[arg]
-
+        print(model_args)
         # Check <standardize_data>
         if not isinstance(model_args["standardize_data"], bool):
             raise ValueError("model_args.standardize_data must be a" + " boolean value")

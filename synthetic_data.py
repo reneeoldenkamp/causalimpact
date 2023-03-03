@@ -94,7 +94,7 @@ method: correlation method "pearson" or "spearman"
 '''
 def gen_plot_data(datapoints, int, method):
     # compute synthetic dataset
-    data, data_int, subtitle = make_dataset(datapoints, "linear", "season_1", int, "linear")
+    data, data_int, subtitle = make_dataset(datapoints, "linear", "season_0", int, "linear")
 
     # exogenous dataset 1-4
     data_1, data_int_1, subtitle_1 = make_dataset(datapoints, "stationary", "season_0", int, "none")
@@ -130,7 +130,7 @@ def gen_plot_data(datapoints, int, method):
     mask = np.triu(np.ones_like(corr, dtype=bool))
     corr = corr.mask(mask)
     fig_corr = px.imshow(corr, text_auto=True, color_continuous_scale='RdBu')
-    fig_corr.show()
+    # fig_corr.show()
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -182,7 +182,7 @@ def gen_plot_data(datapoints, int, method):
             xanchor="left",
             x=0.01)
         )
-    fig.show()
+    # fig.show()
     return data_int, exo_data_1, exo_data_2, exo_data_3, exo_data_4
 
 # Make the synthetic dataset
@@ -196,10 +196,15 @@ data = pd.DataFrame({
     'exo_data_3':exo_data_3, 'exo_data_4':exo_data_4},
     columns = ['data_int', 'exo_data_1', 'exo_data_2', 'exo_data_3', 'exo_data_4'])
 
-from causalimpact.src import causalimpact
-# from causalimpact.analysis import CausalImpact
-impact = CausalImpact(data, [0, intervention], [intervention+1, datapoints-1],
-        model_args={'linear': 'lltrend'})
+from causalimpact import CausalImpact
+
+impact = CausalImpact(data, [0, intervention], [intervention+1, datapoints-1])
+impact_2 = CausalImpact(data, [0, intervention], [intervention+1, datapoints-1],
+        model_args={'level':'lltrend'})
 impact.run()
 impact.summary()
 impact.plot()
+
+impact_2.run()
+impact_2.summary()
+impact_2.plot()
