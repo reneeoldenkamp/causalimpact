@@ -75,7 +75,10 @@ def construct_model(data, model_args=None):
         else:
             raise NotImplementedError()
     mod = UnobservedComponents(**ss)
-    print(mod)
+    result = mod.fit(disp=0)
+    print("SUMMARY")
+    print(result.summary())
+    fig = result.plot_components(legend_loc='lower right', figsize=(15, 9))
     return mod
 
 
@@ -198,7 +201,7 @@ def model_fit(model, estimation, model_args):
     if estimation == "MLE":
         trained_model = model.fit(maxiter=model_args["niter"])
         model_results = ModelResults(model, trained_model, estimation)
-        return model_results
+        return trained_model, model_results
     elif estimation == "pymc":
         loglike = Loglike(model)
         with pm.Model():
@@ -229,5 +232,6 @@ def model_fit(model, estimation, model_args):
 
         # Construct results using these posterior means as parameter values
         results = model.smooth(params)
+        trained_model = model.fit(maxiter=model_args["niter"])
         model_results = ModelResults(model, results, estimation)
-        return model_results
+        return trained_model, model_results

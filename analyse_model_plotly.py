@@ -20,7 +20,7 @@ from data_seasonality import make_dataset_year
 Plot the observed data, the control_data and the prediction
 int: time point of intervention
 '''
-def plot_data(model, int):
+def plot_data(model, control_data, int):
     # Put all data in panda dataframe
     data = pd.DataFrame({'Observed_data': model.inferences['response'],
         'Predicted_data':model.inferences['point_pred'],
@@ -65,7 +65,7 @@ def plot_data(model, int):
             xanchor="left",
             x=0.01)
         )
-    fig.show()
+    # fig.show()
 
 '''
 Check if the noise of the model fit is normally distributed
@@ -73,14 +73,14 @@ Only before intervention, where the model fits the data
 type: choose between 'pre-intervention', 'post-intervention' and 'whole dataset'
 int: time point of intervention
 '''
-def plot_normal_distributed(model, type, int):
+def plot_normal_distributed(model, control_data, type, int):
     if type == 'pre-intervention':
-        residuals = model.inferences['point_pred'][:int] - model.inferences['response'][:int]
+        residuals = model.inferences['point_pred'][:int] - control_data.squeeze()[:int]
 
     if type == 'post-intervention':
         residuals = model.inferences['point_pred'][int:] - control_data.squeeze()[int:]
 
-    if type == 'whole dataset':
+    if type == 'whole_dataset':
         residuals = model.inferences['point_pred'] - control_data.squeeze()
 
     fig = ff.create_distplot([residuals],
@@ -99,7 +99,7 @@ def plot_normal_distributed(model, type, int):
     fig2 = ff.create_distplot([residuals],
         ['Distribution of the residuals'],
         curve_type = 'normal',
-        showlegend = False)
+        bin_size=0.2)
     normal_x = fig2.data[1]['x']
     normal_y = fig2.data[1]['y']
     fig.add_traces(go.Scatter(
@@ -134,12 +134,13 @@ def plot_normal_distributed(model, type, int):
             xanchor="left",
             x=0.01)
         )
-    fig.show()
+    # fig.show()
 
     # qq-plot
-    sm.qqplot(impact.inferences['point_pred'][:int]
+    sm.qqplot(model.inferences['point_pred'][:int]
         - model.inferences['response'][:int], line='45')
     py.show()
+    return mean, std
 
 '''
 Plot the control data and the model data. Check if the control data falls within
@@ -148,7 +149,7 @@ type: choose between 'pre-intervention', 'post-intervention' and 'whole dataset'
 int: time point of intervention
 !!! first precicion interval is really big, so taken out of the set!!!
 '''
-def plot_control_data(model, type, int):
+def plot_control_data(model, control_data, type, int):
     if type == 'pre-intervention':
         data = pd.DataFrame(
             {'Predicted_data':model.inferences['point_pred'][1:int],
@@ -171,7 +172,7 @@ def plot_control_data(model, type, int):
             columns = ['Predicted_data', 'Control_data', 'Time_points',
             'Pred_upper', 'Pred_lower', 'Observed_data'])
 
-    if type == 'whole dataset':
+    if type == 'whole_dataset':
         data = pd.DataFrame(
             {'Predicted_data':model.inferences['point_pred'][1:],
             'Control_data': control_data[1:].squeeze(),
@@ -216,7 +217,7 @@ def plot_control_data(model, type, int):
         mode = 'lines',
         name = 'Observed data',
         line = dict(width = 3)))
-    if type == 'whole dataset':
+    if type == 'whole_dataset':
         fig.add_vline(x = int, line_dash = 'dash', line_color = 'green')
 
     title = "Control data and predicted data with precision interval of 95%: "+type
@@ -243,8 +244,8 @@ Plot the residuals over time untill the intervention, plot the mean.
 type: choose between 'pre-intervention', 'post-intervention' and 'whole dataset'
 int: time point of intervention
 '''
-def plot_residuals(model, type, int):
-    residuals = model.inferences['point_pred'] - model.inferences['response']
+def plot_residuals(model, control_data, type, int):
+    residuals = model.inferences['point_pred'] - control_data.squeeze()
     if type == 'pre-intervention':
         data = pd.DataFrame(
             {'Residuals': residuals[:int],
@@ -257,7 +258,7 @@ def plot_residuals(model, type, int):
             'Time_points': range(int,len(residuals))},
             columns =['Residuals', 'Time_points'])
 
-    if type == 'whole dataset':
+    if type == 'whole_dataset':
         data = pd.DataFrame(
             {'Residuals': residuals,
             'Time_points': range(0,len(residuals))},
@@ -265,7 +266,7 @@ def plot_residuals(model, type, int):
 
     mean = np.mean(data['Residuals'])
     name_mean = 'Mean:' + ("{:.3f}".format(mean))
-    std = np.std(residuals)
+    std = np.std(data['Residuals'])
     name_std_pos = "Std:"+("{:.3f}".format(std))
 
     fig = go.Figure()
@@ -313,7 +314,7 @@ Plot the autocorrelation
 int: time point of intervention
 lags: number of lags
 '''
-def plot_autocorrelation(model, int, lags):
+def plot_autocorrelation(model, control_data, int, lags):
     residuals = model.inferences['point_pred'][:int] - control_data.squeeze()[:int]
     acf_data, ci = acf(residuals, nlags = lags, alpha=0.05)
 
@@ -380,7 +381,7 @@ Plot partial autocorrelation
 int: time point of intervention
 lags: number of lags
 '''
-def plot_Partial_ACF(model, int, lags):
+def plot_Partial_ACF(model, control_data, int, lags):
     residuals = model.inferences['point_pred'][:int] - control_data.squeeze()[:int]
     pacf_data, ci = pacf(residuals, nlags = lags, alpha=0.05)
 
@@ -450,7 +451,7 @@ the difference in IC admissions predicted by the model and the real (observed) d
 the difference in IC admissions of the control data and the real (observed) data.
 the difference of the above two, which shows the precision of the model.
 '''
-def plot_difference(model, int):
+def plot_difference(model, control_data, int):
     pred_diff = model.inferences['point_pred'] - model.inferences['response']
     real_diff = control_data.squeeze() - model.inferences['response']
     precision_model = pred_diff - real_diff
@@ -503,34 +504,35 @@ int: time point of intervention
 '''
 from statsmodels.stats.diagnostic import acorr_ljungbox
 
-def analyse_model(model, int):
+def analyse_model(model, control_data, int):
     control = control_data.squeeze()
     ME = (np.sum((control[int:] - model.inferences['point_pred'][int:])))/len(control[int:])
     MSE = (np.sum((control[int:] - model.inferences['point_pred'][int:])**2))/len(control[int:])
     RMSE = math.sqrt(MSE)
     MAE = (np.sum(abs(control[int:] - model.inferences['point_pred'][int:])))/len(control[int:])
-    residuals = model.inferences['response'][:int] - model.inferences['point_pred'][:int]
+    residuals = model.inferences['point_pred'][:int] - control_data.squeeze()[:int]
     residuals = pd.DataFrame({'residuals':residuals}, columns=['residuals'])
     ljung = []
     for i in range(20):
         ljung.append(acorr_ljungbox(residuals, lags=[i+1], return_df=True))
 
-    print("ME = ",ME, "MSE = ", MSE, "RMSE = ",RMSE, "MAE = ", MAE)
-    print("Ljun = ", ljung)
+    # print("ME = ",ME, "MSE = ", MSE, "RMSE = ",RMSE, "MAE = ", MAE)
+    # print("Ljun = ", ljung)
+    return ME, MSE, RMSE, MAE
 
 # set up for dataset
-datapoints = 364
-int = 250
-lags = 40
-
-data, pre_period, post_period, control_data = make_dataset_year(datapoints, 12, int, True, True)
-impact = CausalImpact(data, pre_period, post_period)
-impact.run()
+# datapoints = 364
+# int = 250
+# lags = 40
+# #
+# data, pre_period, post_period, control_data = make_dataset_year(datapoints, 12, int, True, True)
+# impact = CausalImpact(data, control_data, pre_period, post_period, model_args={'freq_seasonal': [{'period':200, 'harmonics':1}]})
+# impact.run()
 # impact.summary()
-# impact.plot()
-
-# Call functions to plot
-# plot_data(impact, int)
+# impact.plot(control_data)
+#
+# # Call functions to plot
+# plot_data(impact, control_data, int)
 # plot_normal_distributed(impact, 'whole dataset', int)
 # plot_normal_distributed(impact, 'pre-intervention', int)
 # plot_normal_distributed(impact, 'post-intervention', int)

@@ -7,6 +7,7 @@ from causalimpact.misc import standardize_all_variables, df_print, get_matplotli
 from causalimpact.model import construct_model, model_fit
 from causalimpact.inferences import compile_inferences
 import scipy.stats as st
+from scipy.special import boxcox, inv_boxcox
 
 
 class CausalImpact:
@@ -60,6 +61,7 @@ class CausalImpact:
     def __init__(
         self,
         data=None,
+        data_real = None,
         pre_period=None,
         post_period=None,
         model_args=None,
@@ -365,8 +367,8 @@ class CausalImpact:
             "seasonal": None,
             "freq_seasonal": None,
             "dynamic_regression": False,
+            "exponential": False,
         }
-        print(model_args, "HALLOOOOOOOOOOOOOOOOOOOOOO")
 
         if model_args is None:
             model_args = _defaults
@@ -374,7 +376,7 @@ class CausalImpact:
             missing = [key for key in _defaults if key not in model_args]
             for arg in missing:
                 model_args[arg] = _defaults[arg]
-        print(model_args)
+
         # Check <standardize_data>
         if not isinstance(model_args["standardize_data"], bool):
             raise ValueError("model_args.standardize_data must be a" + " boolean value")
@@ -437,10 +439,21 @@ class CausalImpact:
             orig_std_params = sd_results["orig_std_params"]
 
         # Construct model and perform inference
+        lambda_pre = 0
+        lambda_post = 0
+        if model_args["exponential"]:
+            df_pre['data_int'], lambda_pre = st.boxcox(df_pre['data_int'])
+            df_post['data_int'], lambda_post = st.boxcox(df_post['data_int'])
+
+        self.lambda_pre = lambda_pre
+        self.lambda_post = lambda_post
+
         model = construct_model(df_pre, model_args)
         self.model = model
 
-        model_results = model_fit(model, estimation, model_args)
+        trained_model, model_results = model_fit(model, estimation, model_args)
+        llb = trained_model.filter_results.loglikelihood_burn
+        self.llb = llb
 
         inferences = compile_inferences(
             model_results,
@@ -451,11 +464,16 @@ class CausalImpact:
             alpha,
             orig_std_params,
             estimation,
+            lambda_pre,
+            lambda_post,
+            model_args,
         )
 
         # "append" to 'CausalImpact' object
         self.inferences = inferences["series"]
+
         self.results = model_results
+
 
     def _run_with_ucm(
         self, ucm_model, post_period_response, alpha, model_args, estimation
@@ -736,6 +754,7 @@ class CausalImpact:
         confidence = "{}%".format(int((1 - alpha) * 100))
         post_period = self.params["post_period"]
         post_inf = self.inferences.loc[post_period[0] : post_period[1], :]
+        # print(self.inferences['point_pred'])
         post_point_resp = post_inf.loc[:, "response"]
         post_point_pred = post_inf.loc[:, "point_pred"]
         post_point_upper = post_inf.loc[:, "point_pred_upper"]
@@ -869,10 +888,13 @@ class CausalImpact:
 
     def plot(
         self,
+        data_real,
         panels=None,
         figsize=(15, 12),
         fname=None,
     ):
+        llb = self.llb
+
         if panels is None:
             panels = ["original", "pointwise", "cumulative"]
         plt = get_matplotlib()
@@ -883,19 +905,20 @@ class CausalImpact:
             data_inter = pd.Timestamp(data_inter)
 
         inferences = self.inferences.iloc[1:, :]
-
         # Observation and regression components
         if "original" in panels:
             ax1 = plt.subplot(3, 1, 1)
-            plt.plot(inferences.point_pred, "r--", linewidth=2, label="model")
-            plt.plot(inferences.response, "k", linewidth=2, label="endog")
+            plt.plot(inferences.point_pred[llb:], "r--", linewidth=2, label="model")
+            plt.plot(inferences.response[llb:], "k", linewidth=2, label="endog")
+            if data_real is not None:
+                plt.plot(data_real, linewidth=2, label="real data")
 
             plt.axvline(data_inter, c="k", linestyle="--")
 
             plt.fill_between(
-                inferences.index,
-                inferences.point_pred_lower,
-                inferences.point_pred_upper,
+                inferences.index[llb:],
+                inferences.point_pred_lower[llb:],
+                inferences.point_pred_upper[llb:],
                 facecolor="gray",
                 interpolate=True,
                 alpha=0.25,
@@ -911,17 +934,17 @@ class CausalImpact:
             else:
                 ax2 = plt.subplot(312)
             lift = inferences.point_effect
-            plt.plot(lift, "r--", linewidth=2)
-            plt.plot(self.data.index, np.zeros(self.data.shape[0]), "g-", linewidth=2)
+            plt.plot(lift[llb:], "r--", linewidth=2)
+            plt.plot(self.data.index[llb:], np.zeros(self.data.shape[0])[llb:], "g-", linewidth=2)
             plt.axvline(data_inter, c="k", linestyle="--")
 
             lift_lower = inferences.point_effect_lower
             lift_upper = inferences.point_effect_upper
 
             plt.fill_between(
-                inferences.index,
-                lift_lower,
-                lift_upper,
+                inferences.index[llb:],
+                lift_lower[llb:],
+                lift_upper[llb:],
                 facecolor="gray",
                 interpolate=True,
                 alpha=0.25,
@@ -944,13 +967,13 @@ class CausalImpact:
                 linewidth=2,
             )
 
-            plt.plot(self.data.index, np.zeros(self.data.shape[0]), "g-", linewidth=2)
+            plt.plot(self.data.index[llb:], np.zeros(self.data.shape[0])[llb:], "g-", linewidth=2)
             plt.axvline(data_inter, c="k", linestyle="--")
 
             plt.fill_between(
-                inferences.index,
-                inferences.cum_effect_lower,
-                inferences.cum_effect_upper,
+                inferences.index[llb:],
+                inferences.cum_effect_lower[llb:],
+                inferences.cum_effect_upper[llb:],
                 facecolor="gray",
                 interpolate=True,
                 alpha=0.25,
@@ -958,6 +981,11 @@ class CausalImpact:
             plt.axis([inferences.index[0], inferences.index[-1], None, None])
 
             plt.title("Cumulative Impact")
+        if llb > 0:
+            text = ('Note: The first %d observations are not shown, due to'
+                    ' approximate diffuse initialization.')
+            fig.text(0.1, 0.01, text % llb, fontsize='large')
+
         plt.xlabel("$T$")
         if fname is None:
             plt.show()

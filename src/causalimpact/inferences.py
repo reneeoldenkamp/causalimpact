@@ -2,6 +2,8 @@ import numpy as np
 import pandas as pd
 from causalimpact.misc import unstandardize
 
+from scipy.special import boxcox, inv_boxcox
+
 
 def compile_inferences(
     results,
@@ -12,6 +14,9 @@ def compile_inferences(
     alpha,
     orig_std_params,
     estimation,
+    lambda_pre,
+    lambda_post,
+    model_args,
 ):
     """Compiles inferences to make predictions for post intervention
     period.
@@ -33,6 +38,7 @@ def compile_inferences(
         dict containing all data related to the inference process.
     """
     # Compute point predictions of counterfactual (in standardized space)
+
     if df_post is not None:
         # returns pre-period predictions (in-sample)
         predict = results.get_prediction()
@@ -58,13 +64,33 @@ def compile_inferences(
 
     point_pred = pd.concat([pre_pred, post_pred])
 
+    # Get weekly seasonal and add it to the prediction if available
+    if len(model_args["freq_seasonal"])>1:
+        from statsmodels.tsa.seasonal import seasonal_decompose
+        decomposition = seasonal_decompose(data['data_int'], model='additive', period=7)
+        seasonal = decomposition.seasonal
+        point_pred = point_pred.add(seasonal, axis='index')
+
     pre_ci = unstandardize(predict.conf_int(alpha=alpha), orig_std_params)
     pre_ci.index = df_pre.index
 
     post_ci = unstandardize(forecast.conf_int(alpha=alpha), orig_std_params)
-
     post_ci.index = df_post.index
+
     ci = pd.concat([pre_ci, post_ci])
+
+    # Subtract the point_prediction before inv_boxcox
+    ci_log = ci.sub(point_pred.iloc[:,0], axis='index')
+    # ci_log = inv_boxcox(ci_log, lambda_pre)
+    # print(ci_log)
+
+    # Make inverse boxcox to make data exponential again
+    if model_args["exponential"]:
+        point_pred = inv_boxcox(point_pred, lambda_pre)
+
+    # Add point_prediction to the ic again, if there is no exponential growth the same value is subtracted and added again
+    point_pred_series = point_pred.iloc[:,0]
+    ci = ci_log.add(point_pred_series, axis='index')
     point_pred_lower = ci.iloc[:, 0].to_frame()
     point_pred_upper = ci.iloc[:, 1].to_frame()
 

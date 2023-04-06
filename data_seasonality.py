@@ -54,7 +54,7 @@ def make_dataset_year(datapoints, seasonality, intervention, exponential, weekly
     if exponential == True:
         x += np.logspace(1,6, num=datapoints, base=2)
 
-    # Add Noise
+    # Add noise
     x += np.random.randn(datapoints)*2
 
     # Make y
