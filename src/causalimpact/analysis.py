@@ -10,6 +10,12 @@ import scipy.stats as st
 from scipy.special import boxcox, inv_boxcox
 
 
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.figure_factory as ff
+import matplotlib.pyplot as plt
+
+
 class CausalImpact:
     """CausalImpact() performs causal inference through counterfactual
     predictions using a Bayesian structural time-series model.
@@ -444,6 +450,29 @@ class CausalImpact:
         if model_args["exponential"]:
             df_pre['data_int'], lambda_pre = st.boxcox(df_pre['data_int'])
             df_post['data_int'], lambda_post = st.boxcox(df_post['data_int'])
+            print(df_pre['data_int'], pd.DataFrame(range(0, len(df_pre['data_int']))))
+            # fig = go.Figure()
+            # fig.add_trace(go.Scatter(
+            #     y = df_pre['data_int'],
+            #     x = pd.DataFrame(range(0, len(df_pre['data_int']))),
+            #     mode='lines',
+            #     line=dict(width=3)
+            # ))
+            # fig.update_layout(
+            #     xaxis_title="Time points",
+            #     yaxis_title="Data",
+            #     font_family="Arial",
+            #     font_color="black",
+            #     font_size=30,
+            #     legend=dict(
+            #         yanchor="top",
+            #         y=0.90,
+            #         xanchor="left",
+            #         x=0.01)
+            # )
+            # fig.show()
+            plt.plot(range(0,len(df_pre['data_int'])), df_pre['data_int'])
+            plt.show()
 
         self.lambda_pre = lambda_pre
         self.lambda_post = lambda_post

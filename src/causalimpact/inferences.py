@@ -65,11 +65,11 @@ def compile_inferences(
     point_pred = pd.concat([pre_pred, post_pred])
 
     # Get weekly seasonal and add it to the prediction if available
-    if len(model_args["freq_seasonal"])>1:
-        from statsmodels.tsa.seasonal import seasonal_decompose
-        decomposition = seasonal_decompose(data['data_int'], model='additive', period=7)
-        seasonal = decomposition.seasonal
-        point_pred = point_pred.add(seasonal, axis='index')
+    # if model_args["freq_seasonal"] and if len(model_args["freq_seasonal"])>1:
+    #     from statsmodels.tsa.seasonal import seasonal_decompose
+    #     decomposition = seasonal_decompose(data['data_int'], model='additive', period=7)
+    #     seasonal = decomposition.seasonal
+    #     point_pred = point_pred.add(seasonal, axis='index')
 
     pre_ci = unstandardize(predict.conf_int(alpha=alpha), orig_std_params)
     pre_ci.index = df_pre.index
@@ -80,17 +80,21 @@ def compile_inferences(
     ci = pd.concat([pre_ci, post_ci])
 
     # Subtract the point_prediction before inv_boxcox
-    ci_log = ci.sub(point_pred.iloc[:,0], axis='index')
-    # ci_log = inv_boxcox(ci_log, lambda_pre)
+    # ci_log = ci.sub(point_pred.iloc[:,0], axis='index')
+
     # print(ci_log)
 
     # Make inverse boxcox to make data exponential again
     if model_args["exponential"]:
         point_pred = inv_boxcox(point_pred, lambda_pre)
+        ci = inv_boxcox(ci, lambda_pre)
 
     # Add point_prediction to the ic again, if there is no exponential growth the same value is subtracted and added again
-    point_pred_series = point_pred.iloc[:,0]
-    ci = ci_log.add(point_pred_series, axis='index')
+    # point_pred_series = point_pred.iloc[:,0]
+    # ci = ci_log.add(point_pred_series, axis='index')
+
+
+
     point_pred_lower = ci.iloc[:, 0].to_frame()
     point_pred_upper = ci.iloc[:, 1].to_frame()
 
