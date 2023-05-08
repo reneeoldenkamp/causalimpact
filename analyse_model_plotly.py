@@ -14,6 +14,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
 
+from statsmodels.stats.diagnostic import acorr_ljungbox
+from sklearn.metrics import mean_absolute_percentage_error
+
 from data_seasonality import make_dataset_year
 
 '''
@@ -502,23 +505,35 @@ def plot_difference(model, control_data, int):
 Quantitative measures to analyse the model
 int: time point of intervention
 '''
-from statsmodels.stats.diagnostic import acorr_ljungbox
-
 def analyse_model(model, control_data, int):
     control = control_data.squeeze()
     ME = (np.sum((control[int:] - model.inferences['point_pred'][int:])))/len(control[int:])
     MSE = (np.sum((control[int:] - model.inferences['point_pred'][int:])**2))/len(control[int:])
     RMSE = math.sqrt(MSE)
     MAE = (np.sum(abs(control[int:] - model.inferences['point_pred'][int:])))/len(control[int:])
+    MAPE = mean_absolute_percentage_error(control[int:], model.inferences['point_pred'][int:])
     residuals = model.inferences['point_pred'][:int] - control_data.squeeze()[:int]
     residuals = pd.DataFrame({'residuals':residuals}, columns=['residuals'])
     ljung = []
     for i in range(20):
         ljung.append(acorr_ljungbox(residuals, lags=[i+1], return_df=True))
 
-    # print("ME = ",ME, "MSE = ", MSE, "RMSE = ",RMSE, "MAE = ", MAE)
-    # print("Ljun = ", ljung)
-    return ME, MSE, RMSE, MAE
+    return ME, MSE, MAPE, RMSE, MAE
+
+def analyse_model_1(predictions, data_real, int):
+    print(len(predictions), len(data_real[int:]))
+    ME = (np.sum((data_real[int:] - predictions)))/len(predictions)
+    MSE = (np.sum((data_real[int:] - predictions)**2))/len(predictions)
+    RMSE = math.sqrt(MSE)
+    MAE = (np.sum(abs(data_real[int:] - predictions)))/len(predictions)
+    MAPE = mean_absolute_percentage_error(data_real[int:], predictions)
+    residuals = predictions - data_real[int:]
+    residuals = pd.DataFrame({'residuals':residuals}, columns=['residuals'])
+    ljung = []
+    for i in range(20):
+        ljung.append(acorr_ljungbox(residuals, lags=[i+1], return_df=True))
+
+    return ME, MSE, MAPE, RMSE, MAE
 
 # set up for dataset
 # datapoints = 364

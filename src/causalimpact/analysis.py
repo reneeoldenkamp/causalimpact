@@ -15,6 +15,7 @@ import plotly.graph_objects as go
 import plotly.figure_factory as ff
 import matplotlib.pyplot as plt
 
+from statsmodels.tsa.seasonal import seasonal_decompose
 
 class CausalImpact:
     """CausalImpact() performs causal inference through counterfactual
@@ -374,6 +375,8 @@ class CausalImpact:
             "freq_seasonal": None,
             "dynamic_regression": False,
             "exponential": False,
+            "data_name": 'data_int',
+            "week_season":False
         }
 
         if model_args is None:
@@ -426,11 +429,11 @@ class CausalImpact:
     def _run_with_data(
         self, data, pre_period, post_period, model_args, alpha, estimation
     ):
+        data_name = model_args['data_name']
         # Zoom in on data in modeling range
         if data.shape[1] == 1:  # no exogenous values provided
             raise ValueError("data contains no exogenous variables")
         data_modeling = data.copy()
-
         df_pre = data_modeling.loc[pre_period[0] : pre_period[1], :]
         df_post = data_modeling.loc[post_period[0] : post_period[1], :]
 
@@ -444,42 +447,42 @@ class CausalImpact:
             df_post = sd_results["data_post"]
             orig_std_params = sd_results["orig_std_params"]
 
-        # Construct model and perform inference
+        # Make data logarithmic if data had exponential growth
         lambda_pre = 0
         lambda_post = 0
         if model_args["exponential"]:
-            df_pre['data_int'], lambda_pre = st.boxcox(df_pre['data_int'])
-            df_post['data_int'], lambda_post = st.boxcox(df_post['data_int'])
-            print(df_pre['data_int'], pd.DataFrame(range(0, len(df_pre['data_int']))))
-            # fig = go.Figure()
-            # fig.add_trace(go.Scatter(
-            #     y = df_pre['data_int'],
-            #     x = pd.DataFrame(range(0, len(df_pre['data_int']))),
-            #     mode='lines',
-            #     line=dict(width=3)
-            # ))
-            # fig.update_layout(
-            #     xaxis_title="Time points",
-            #     yaxis_title="Data",
-            #     font_family="Arial",
-            #     font_color="black",
-            #     font_size=30,
-            #     legend=dict(
-            #         yanchor="top",
-            #         y=0.90,
-            #         xanchor="left",
-            #         x=0.01)
-            # )
-            # fig.show()
-            plt.plot(range(0,len(df_pre['data_int'])), df_pre['data_int'])
-            plt.show()
+            df_pre[data_name] += 0.001
+            df_post[data_name] += 0.001
+            df_pre[data_name], lambda_pre = st.boxcox(df_pre[data_name])
+            print("LAMBDA", lambda_pre)
+            df_post[data_name], lambda_post = st.boxcox(df_post[data_name])
+
+            # plt.plot(range(0, len(df_pre[data_name])), df_pre[data_name])
+            # plt.title("BOXCOX")
+            # plt.show()
 
         self.lambda_pre = lambda_pre
         self.lambda_post = lambda_post
 
+        # Get seasonal component
+        seasonal = []
+        if model_args["week_season"]:
+            # print("Test 3")
+            decomposition = seasonal_decompose(df_pre[data_name], model='additive', period=7)
+            seasonal = decomposition.seasonal
+            # plt.plot(seasonal)
+            # plt.show()
+            df_pre[data_name] = df_pre[data_name].subtract(seasonal, axis='index')
+            # print("PLOT nseasons subtract")
+            # plt.plot(df_pre[data_name])
+            # plt.title("subtract season")
+            # plt.show()
+
+        # Construct model and perform inference
         model = construct_model(df_pre, model_args)
         self.model = model
 
+        # Calculate burn-in period
         trained_model, model_results = model_fit(model, estimation, model_args)
         llb = trained_model.filter_results.loglikelihood_burn
         self.llb = llb
@@ -496,6 +499,7 @@ class CausalImpact:
             lambda_pre,
             lambda_post,
             model_args,
+            seasonal,
         )
 
         # "append" to 'CausalImpact' object
@@ -783,6 +787,12 @@ class CausalImpact:
         confidence = "{}%".format(int((1 - alpha) * 100))
         post_period = self.params["post_period"]
         post_inf = self.inferences.loc[post_period[0] : post_period[1], :]
+        # print(post_inf)
+
+        post_inf = abs(post_inf)
+        post_inf = post_inf.fillna(0.001)
+
+        # print(post_inf)
         # print(self.inferences['point_pred'])
         post_point_resp = post_inf.loc[:, "response"]
         post_point_pred = post_inf.loc[:, "point_pred"]
@@ -794,6 +804,7 @@ class CausalImpact:
         cum_resp = post_point_resp.sum()
         cum_resp_fmt = int(cum_resp)
         mean_pred = post_point_pred.mean()
+        print(post_point_pred)
         mean_pred_fmt = int(post_point_pred.mean())
         cum_pred = post_point_pred.sum()
         cum_pred_fmt = int(cum_pred)
@@ -842,8 +853,9 @@ class CausalImpact:
         # calculate standard deviation from the 95% conf interval
         std_pred = (
             mean_upper - mean_pred
-        ) / 1.96  # from mean_upper = mean_pred + 1.96 * std
+        ) / 1.96 # from mean_upper = mean_pred + 1.96 * std
         # calculate z score
+        # std_pred = 0.001
         z_score = (0 - mean_pred) / std_pred
         # pvalue from zscore
         p_value = st.norm.cdf(z_score)
@@ -934,6 +946,7 @@ class CausalImpact:
             data_inter = pd.Timestamp(data_inter)
 
         inferences = self.inferences.iloc[1:, :]
+        # inferences.point_pred = abs(inferences.point_pred)
         # Observation and regression components
         if "original" in panels:
             ax1 = plt.subplot(3, 1, 1)

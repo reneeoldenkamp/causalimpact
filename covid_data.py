@@ -9,14 +9,12 @@ import matplotlib.pyplot as plt
 import plotly.figure_factory as ff
 import scipy
 
-'''
-Covid data from RIVM with IC admissions:
-'https://data.rivm.nl/data/covid-19/COVID-19_ic_opnames_tm_03102021.csv'
-And weather data from KNMI https://daggegevens.knmi.nl/.
-Combined into one panda dataframe, for time index 27-02-2020 untill 3-10-2021.
-'''
 def data_loader():
-    '''
+    """ Load data from RIVM with IC admissions:
+    'https://data.rivm.nl/data/covid-19/COVID-19_ic_opnames_tm_03102021.csv'
+    And weather data from KNMI https://daggegevens.knmi.nl/.
+    Combined into one panda dataframe, for time index 27-02-2020 untill 3-10-2021.
+
     Version:
     Date_of_report: Date and time at which the datafile is made bij RIVM
     Date_of_statistics: Date of admission to the IC or date that the admission is
@@ -30,8 +28,10 @@ def data_loader():
     hebben de methode om in dergelijke gevallen de meest relevante IC opnamedatum te
     bepalen zoveel mogelijk gelijk getrokken, maar de aantallen kunnen iets afwijken
     van de gegevens zoals gepresenteerd door de NICE registratie
-    '''
-    fields = ['Date_of_statistics','IC_admission_notification','IC_admission']
+    'IC_admission_notification',
+    """
+
+    fields = ['Date_of_statistics','IC_admission']
     df_IC = pd.read_csv('https://data.rivm.nl/data/covid-19/COVID-19_ic_opnames_tm_03102021.csv',
         sep = ";",
         usecols=fields)
@@ -60,15 +60,24 @@ def data_loader():
     df = pd.concat([df_IC, df_weather], axis=1)
     df = df.reset_index()
 
-    mask = (df['Date']>'2020-06-01')&(df['Date']<='2020-11-4')
+    mask = (df['Date']>'2020-06-01')&(df['Date']<='2020-12-13')
     df_second_wave = df.loc[mask]
 
     return df_IC, df_weather, df, df_second_wave
 
-'''
-Plots the covid data and the weather data to the time points
-'''
+
 def data_plot(df):
+    """ Plots the covid data and the weather data to the time points
+
+    Parameters
+    ----------
+    df: Pandas Dataframe
+        dataset
+
+    Returns
+    -------
+    plot with Covid-19 data and weather factors
+    """
     fig = go.Figure()
     fig.add_trace(go.Scatter(x = df['Date'],
         y = df['FG'],
@@ -110,11 +119,18 @@ def data_plot(df):
         title_font_size = 28)
     # fig.show()
 
-'''
-Scatter plots of the different weather datasets to the IC admissions of the
-RIVM dataset.
-'''
+
 def scatter_plot(df, method):
+    """
+    Scatter plots of the different weather datasets to the IC admissions of the
+    RIVM dataset.
+
+    Parameters
+    ----------
+    df: Pandas Dataframe
+        dataset
+    method: Pearson or Spearson correlation method
+    """
     corr = df.corr(method = method)
     corr_FG = method + " correlation = " + "{:.2f}".format(corr['IC_admission'][2])
     corr_TG = method + " correlation = " + "{:.2f}".format(corr['IC_admission'][3])
@@ -180,6 +196,19 @@ def scatter_plot(df, method):
     # fig_2.show()
 
 def correlation_matrix(df, method):
+    """ Plots a correlation matrix
+
+    Parameters
+    ----------
+    df: Pandas Dataframe
+        dataset
+    method:
+        Pearson or Spearman correlation metric
+
+    Return
+    ------
+    matrix with correlation values
+    """
     corr = df.corr(method = method)
     mask = np.triu(np.ones_like(corr, dtype=bool))
     corr = corr.mask(mask)
@@ -201,8 +230,22 @@ def correlation_matrix(df, method):
         yaxis_showgrid = False)
     # fig_3.show()
 
-df_IC, df_weather, df, df_second_wave = data_loader()
+from causalimpact import CausalImpact
 
-data_plot(df_second_wave)
-scatter_plot(df, "pearson")
-correlation_matrix(df, "pearson")
+df_IC, df_weather, df, df_second_wave = data_loader()
+# print(df_second_wave.head())
+# print(df_second_wave)
+df_second_wave = df_second_wave.drop('Date', axis=1)
+real_data = df_second_wave['IC_admission']
+# print(df_second_wave.head())
+# df = pd.DataFrame({'df_second_wave':df_second_wave, 'df_weather':df_weather}, columns=['df_second_wave', 'data_weather'])
+# print(df.head()
+impact = CausalImpact(df_second_wave, real_data, [96,232], [233, 289], model_args={'level':'lltrend', 'trend':'lltrend', 'nseasons':2,
+                        'freq_seasonal': [{'period': 365, 'harmonics': 1}], 'exponential':False, 'standardize_data':False, 'data_name':"IC_admission"})
+impact.run()
+impact.summary()
+impact.plot(real_data)
+#
+# data_plot(df)
+# scatter_plot(df, "pearson")
+# correlation_matrix(df, "pearson")
