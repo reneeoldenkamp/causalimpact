@@ -125,6 +125,7 @@ class CausalImpact:
                 kwargs["model_args"],
                 self.params["estimation"],
             )
+        return self.aic, self.llf, self.params_names, self.coef, self.sterr, self.pvalue
 
     @staticmethod
     def _format_input_data(data):
@@ -454,7 +455,6 @@ class CausalImpact:
             df_pre[data_name] += 0.001
             df_post[data_name] += 0.001
             df_pre[data_name], lambda_pre = st.boxcox(df_pre[data_name])
-            print("LAMBDA", lambda_pre)
             df_post[data_name], lambda_post = st.boxcox(df_post[data_name])
 
             # plt.plot(range(0, len(df_pre[data_name])), df_pre[data_name])
@@ -467,19 +467,30 @@ class CausalImpact:
         # Get seasonal component
         seasonal = []
         if model_args["week_season"]:
-            # print("Test 3")
             decomposition = seasonal_decompose(df_pre[data_name], model='additive', period=7)
             seasonal = decomposition.seasonal
             # plt.plot(seasonal)
             # plt.show()
             df_pre[data_name] = df_pre[data_name].subtract(seasonal, axis='index')
-            # print("PLOT nseasons subtract")
+            # plt.plot(df_pre[data_name])
             # plt.plot(df_pre[data_name])
             # plt.title("subtract season")
             # plt.show()
 
         # Construct model and perform inference
         model = construct_model(df_pre, model_args)
+
+        result = model.fit(disp=0)
+        self.params_names = result.param_names
+        self.aic = result.aic
+        self.llf = result.llf
+        self.coef = result.params
+        self.sterr = result.bse
+        self.pvalue = result.pvalues
+
+        print(result.summary())
+        # fig = result.plot_components(legend_loc='lower right', figsize=(15, 9))
+
         self.model = model
 
         # Calculate burn-in period
@@ -506,6 +517,7 @@ class CausalImpact:
         self.inferences = inferences["series"]
 
         self.results = model_results
+
 
 
     def _run_with_ucm(
@@ -787,13 +799,10 @@ class CausalImpact:
         confidence = "{}%".format(int((1 - alpha) * 100))
         post_period = self.params["post_period"]
         post_inf = self.inferences.loc[post_period[0] : post_period[1], :]
-        # print(post_inf)
 
         post_inf = abs(post_inf)
         post_inf = post_inf.fillna(0.001)
 
-        # print(post_inf)
-        # print(self.inferences['point_pred'])
         post_point_resp = post_inf.loc[:, "response"]
         post_point_pred = post_inf.loc[:, "point_pred"]
         post_point_upper = post_inf.loc[:, "point_pred_upper"]
@@ -804,7 +813,6 @@ class CausalImpact:
         cum_resp = post_point_resp.sum()
         cum_resp_fmt = int(cum_resp)
         mean_pred = post_point_pred.mean()
-        print(post_point_pred)
         mean_pred_fmt = int(post_point_pred.mean())
         cum_pred = post_point_pred.sum()
         cum_pred_fmt = int(cum_pred)

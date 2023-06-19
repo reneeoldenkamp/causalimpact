@@ -5,12 +5,6 @@ from causalimpact.misc import unstandardize
 from scipy.special import boxcox, inv_boxcox
 import matplotlib.pyplot as plt
 
-# def invboxcox(y,ld):
-#    if ld == 0:
-#       return(np.exp(y))
-#    else:
-#       return(np.exp(np.log(ld*y+1)/ld))
-
 def inverse_box_cox(x, lmbda):
     """Return inverse of Box Cox transformation.
 
@@ -91,14 +85,12 @@ def compile_inferences(
         )
 
     # Compile summary statistics (in original space)
-
     pre_pred = unstandardize(predict.predicted_mean, orig_std_params)
     pre_pred.index = df_pre.index
-    # print(pre_pred)
     post_pred = unstandardize(forecast.predicted_mean, orig_std_params)
     post_pred.index = df_post.index
-    # print(post_pred)
     point_pred = pd.concat([pre_pred, post_pred])
+
     pre_ci = unstandardize(predict.conf_int(alpha=alpha), orig_std_params)
     pre_ci.index = df_pre.index
 

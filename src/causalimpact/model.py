@@ -75,10 +75,6 @@ def construct_model(data, model_args=None):
         else:
             raise NotImplementedError()
     mod = UnobservedComponents(**ss)
-    result = mod.fit(disp=0)
-    print("SUMMARY")
-    print(result.summary())
-    fig = result.plot_components(legend_loc='lower right', figsize=(15, 9))
     return mod
 
 

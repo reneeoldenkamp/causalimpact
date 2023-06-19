@@ -1,0 +1,20 @@
+\begin{tabular}{lllrrrrrrrrrr}
+\toprule
+      Trend &   Season &        Model &  mean\_residuals &  std\_residuals &  MAPE &   RMSE &    MAE &      AIC &  Beta coef &  std err &  Beta P>|z| &  Run time \\
+\midrule
+exponential & season\_0 & CausalImpact &           6.568 &         15.325 & 0.015 & 16.673 & 13.789 & 3662.551 &      0.116 &   15.325 &       0.888 &     0.555 \\
+exponential & season\_0 &       ARIMAX &           0.000 &          0.000 & 0.000 &  0.000 &  0.000 &    0.000 &      0.000 &    0.000 &       0.000 &     0.000 \\
+exponential & season\_0 &      XGBoost &           0.000 &          0.000 & 0.000 &  0.000 &  0.000 &    0.000 &      0.000 &    0.000 &       0.000 &     0.000 \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lrrr}
+\toprule
+{} &   coef &  std\_err &  pvalues \\
+Name             &        &          &          \\
+\midrule
+sigma2.irregular & 79.151 &    3.898 &    0.000 \\
+sigma2.level     &  0.000 &    0.393 &    1.000 \\
+sigma2.trend     &  0.002 &    0.001 &    0.134 \\
+beta.x1          &  0.116 &    0.826 &    0.888 \\
+\bottomrule
+\end{tabular}

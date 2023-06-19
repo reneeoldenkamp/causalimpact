@@ -42,7 +42,7 @@ def gen_dataset(datapoints, trend, seasonality, int, post_int):
     season_year = np.linspace(0,0,datapoints)
     season_week = np.linspace(0,0,datapoints)
     if seasonality == 'season_1':
-        x = np.arange(0, datapoints / 20, 0.05)
+        x = np.arange(0, datapoints/20, 0.05)
         season_year = np.sin(x)*2
         data += season_year
         season_name = "year season"
@@ -50,7 +50,7 @@ def gen_dataset(datapoints, trend, seasonality, int, post_int):
     # If there is a weekly seasonality
     elif seasonality == 'season_2':
         # x = np.linspace(-np.pi,np.pi,(1/3)*datapoints)
-        x = np.arange(0,datapoints/10,0.1)
+        x = np.arange(0,datapoints/20,0.05)
         y = np.sin(x)
         data += y
         j = 0
@@ -89,6 +89,7 @@ def gen_dataset(datapoints, trend, seasonality, int, post_int):
         # with inv_boxcox (period is 62)
         data = (0.1 * x) + data
         data = inv_boxcox(data, 0.5)
+        exp_trend = inv_boxcox(x,0.5)
 
     data += 1
 
@@ -253,13 +254,19 @@ def gen_exo_data(datapoints, int, method, trend, season, post_trend):
     data_real = data
     return data_real, data_int, exo_data_1, exo_data_2, exo_data_3, exo_data_4, corr['control_data']
 
-
-
+#
+# datapoints = 600
+# int = 500
+# trend = "linear"
+# season = "season_1"
+# post_trend = "linear"
+# lags = 40
 # data_real, data_int, exo_data_1, exo_data_2, exo_data_3, exo_data_4, correlation = gen_exo_data(datapoints,
-#                                                                                                 intervention,
+#                                                                                                 int,
 #                                                                                                 "pearson", trend,
 #                                                                                                 season, post_trend)
 #
+# from causalimpact import CausalImpact
 # # data = pd.DataFrame({
 # #     'data_int':data_int, 'exo_data_1':exo_data_1, 'exo_data_2':exo_data_2,
 # #     'exo_data_3':exo_data_3, 'exo_data_4':exo_data_4},
@@ -268,94 +275,94 @@ def gen_exo_data(datapoints, int, method, trend, season, post_trend):
 # data_high = pd.DataFrame({'data_int': data_int, 'exo_data_3': exo_data_3}, columns=['data_int', 'exo_data_3'])
 # # data_medium = pd.DataFrame({'data_int':data_int, 'exo_data_2':exo_data_2}, columns=['data_int', 'exo_data_2'])
 # # data_low = pd.DataFrame({'data_int':data_int, 'exo_data_1':exo_data_1}, columns=['data_int', 'exo_data_1'])
-#
-# # impact_four = CausalImpact(data, data_real, [0, intervention], [intervention+1, datapoints-1],
-# #         model_args={'level':'lltrend', 'trend':'lltrend', 'nseasons':0, 'exponential':True, 'standardize_data':False})
-#
-# impact = CausalImpact(data, data_real, [0, int], [int+1, datapoints-1],
+# #
+# # # impact_four = CausalImpact(data, data_real, [0, intervention], [intervention+1, datapoints-1],
+# # #         model_args={'level':'lltrend', 'trend':'lltrend', 'nseasons':0, 'exponential':True, 'standardize_data':False})
+# #
+# impact_high = CausalImpact(data_high, data_real, [0, int], [int+1, datapoints-1],
 #         model_args={'level':'lltrend', 'trend':'lltrend', 'week_season':True,
-#         'freq_seasonal':[{'period':62, 'harmonics':1}], 'exponential':True, 'standardize_data':False})
+#         'freq_seasonal':[{'period':112, 'harmonics':1}], 'exponential':True, 'standardize_data':False})
 #
-# # impact_medium = CausalImpact(data_medium, data_real, [0, intervention], [intervention+1, datapoints-1],
-# #         model_args={'level':'lltrend', 'trend':'lltrend',
-# #         'freq_seasonal':[{'period':200, 'harmonics':1}],'nseasons':1, 'exponential':True,'standardize_data':False})
+# # # impact_medium = CausalImpact(data_medium, data_real, [0, intervention], [intervention+1, datapoints-1],
+# # #         model_args={'level':'lltrend', 'trend':'lltrend',
+# # #         'freq_seasonal':[{'period':200, 'harmonics':1}],'nseasons':1, 'exponential':True,'standardize_data':False})
+# # #
+# # # impact_low = CausalImpact(data_low, data_real, [0, intervention], [intervention+1, datapoints-1],
+# # #         model_args={'level':'lltrend', 'trend':'lltrend',
+# # #         'freq_seasonal':[{'period':200, 'harmonics':1}],'nseasons':1, 'exponential':True,'standardize_data':False})
 # #
-# # impact_low = CausalImpact(data_low, data_real, [0, intervention], [intervention+1, datapoints-1],
-# #         model_args={'level':'lltrend', 'trend':'lltrend',
-# #         'freq_seasonal':[{'period':200, 'harmonics':1}],'nseasons':1, 'exponential':True,'standardize_data':False})
-#
-# #
-# # impact_low.run()
-# # impact_low.summary()
-# # impact_low.plot(data_real)
-# #
-# # impact_medium.run()
-# # impact_medium.summary()
-# # impact_medium.plot(data_real)
-# #
+# # #
+# # # impact_low.run()
+# # # impact_low.summary()
+# # # impact_low.plot(data_real)
+# # #
+# # # impact_medium.run()
+# # # impact_medium.summary()
+# # # impact_medium.plot(data_real)
+# # #
 # impact_high.run()
 # impact_high.summary()
 # impact_high.plot(data_real)
 #
-# predictions = impact_high.inferences['point_pred'][int:]
-# #
-# # impact_four.run()
-# # impact_four.summary()
-# # impact_four.plot(data_real)
-
-
-
-
-
-    # # plot_data(impact_low, data_real, intervention)
-    # mean_low, std_low = plot_normal_distributed(impact_low, data_real, 'pre-intervention', intervention)
-    # # plot_residuals(impact_low, data_real, 'pre-intervention', intervention)
-    # # plot_autocorrelation(impact_low, data_real, intervention, 40)
-    # # plot_Partial_ACF(impact_low, data_real, intervention, 40)
-    # # plot_difference(impact_low, data_real, intervention)
-    # # analyse_model(impact_low, data_real, intervention)
-    # ME_low, MSE_low, MAPE_low, RMSE_low, MAE_low = analyse_model(impact_low, data_real, intervention)
-    #
-    # # plot_data(impact_medium, data_real, intervention)
-    # mean_medium, std_medium = plot_normal_distributed(impact_medium, data_real, 'pre-intervention', intervention)
-    # # plot_residuals(impact_medium, 'pre-intervention', intervention)
-    # # plot_autocorrelation(impact_medium, data_real, intervention, 40)
-    # # plot_Partial_ACF(impact_medium, data_real, intervention, 40)
-    # # plot_difference(impact_medium, data_real, intervention)
-    # # analyse_model(impact_medium, data_real, intervention)
-    # ME_medium, MSE_medium, MAPE_medium, RMSE_medium, MAE_medium = analyse_model(impact_medium, data_real, intervention)
-    #
-    # # plot_data(impact_high, data_real, intervention)
-    # mean_high, std_high = plot_normal_distributed(impact_high, data_real, 'pre-intervention', intervention)
-    # # plot_residuals(impact_high, 'pre-intervention', intervention)
-    # # plot_autocorrelation(impact_high, data_real, intervention, 40)
-    # # plot_Partial_ACF(impact_high, data_real, intervention, 40)
-    # # plot_difference(impact_high, data_real, intervention)
-    # # analyse_model(impact_high, data_real, intervention)
-    # ME_high, MSE_high, MAPE_high, RMSE_high, MAE_high = analyse_model(impact_high, data_real, intervention)
-    #
-    # # plot_data(impact_four, data_real, intervention)
-    # mean_four, std_four = plot_normal_distributed(impact_four, data_real, 'pre-intervention', intervention)
-    # # plot_residuals(impact_four, data_real, 'pre-intervention', intervention)
-    # # plot_autocorrelation(impact_four, data_real, intervention, 40)
-    # # plot_Partial_ACF(impact_four, data_real, intervention, 40)
-    # # plot_difference(impact_four, data_real, intervention)
-    # ME_four, MSE_four, MAPE_four, RMSE_four, MAE_four = analyse_model(impact_four, data_real, intervention)
-    #
-    # analysis = pd.DataFrame()
-    # analysis['trend'] = [trend, trend, trend, trend ]
-    # analysis['season'] = [season, season, season, season]
-    # analysis['name'] = ['Four', 'High', 'Medium', 'Low']
-    # analysis['correlation'] = [correlation[4], correlation[3], correlation[2], correlation[1]]
-    # analysis['mean_residuals'] = [mean_four, mean_high, mean_medium, mean_low]
-    # analysis['std_residuals'] = [std_four, std_high, std_medium, std_low]
-    # analysis['ME'] = [ME_four, ME_high, ME_medium, ME_low]
-    # analysis['MSE'] = [MSE_four, MSE_high, MSE_medium, MSE_low]
-    # analysis['MAPE'] = [MAPE_four, MAPE_high, MAPE_medium, MAPE_low]
-    # analysis['RMSE'] = [RMSE_four, RMSE_high, RMSE_medium, RMSE_low]
-    # analysis['MAE'] = [MAE_four, MAE_high, MAE_medium, MAE_low]
-    # print(analysis.to_latex(index=False,
-    #                   formatters={"name": str.upper},
-    #                   float_format="{:.3f}".format,
-    # ))
-    # print(analysis)
+# # predictions = impact_high.inferences['point_pred'][int:]
+# # #
+# # # impact_four.run()
+# # # impact_four.summary()
+# # # impact_four.plot(data_real)
+#
+#
+#
+#
+#
+#     # # plot_data(impact_low, data_real, intervention)
+#     # mean_low, std_low = plot_normal_distributed(impact_low, data_real, 'pre-intervention', intervention)
+#     # # plot_residuals(impact_low, data_real, 'pre-intervention', intervention)
+#     # # plot_autocorrelation(impact_low, data_real, intervention, 40)
+#     # # plot_Partial_ACF(impact_low, data_real, intervention, 40)
+#     # # plot_difference(impact_low, data_real, intervention)
+#     # # analyse_model(impact_low, data_real, intervention)
+#     # ME_low, MSE_low, MAPE_low, RMSE_low, MAE_low = analyse_model(impact_low, data_real, intervention)
+#     #
+#     # # plot_data(impact_medium, data_real, intervention)
+#     # mean_medium, std_medium = plot_normal_distributed(impact_medium, data_real, 'pre-intervention', intervention)
+#     # # plot_residuals(impact_medium, 'pre-intervention', intervention)
+#     # # plot_autocorrelation(impact_medium, data_real, intervention, 40)
+#     # # plot_Partial_ACF(impact_medium, data_real, intervention, 40)
+#     # # plot_difference(impact_medium, data_real, intervention)
+#     # # analyse_model(impact_medium, data_real, intervention)
+#     # ME_medium, MSE_medium, MAPE_medium, RMSE_medium, MAE_medium = analyse_model(impact_medium, data_real, intervention)
+#     #
+#     # # plot_data(impact_high, data_real, intervention)
+#     # mean_high, std_high = plot_normal_distributed(impact_high, data_real, 'pre-intervention', intervention)
+#     # # plot_residuals(impact_high, 'pre-intervention', intervention)
+#     # # plot_autocorrelation(impact_high, data_real, intervention, 40)
+#     # # plot_Partial_ACF(impact_high, data_real, intervention, 40)
+#     # # plot_difference(impact_high, data_real, intervention)
+#     # # analyse_model(impact_high, data_real, intervention)
+#     # ME_high, MSE_high, MAPE_high, RMSE_high, MAE_high = analyse_model(impact_high, data_real, intervention)
+#     #
+#     # # plot_data(impact_four, data_real, intervention)
+#     # mean_four, std_four = plot_normal_distributed(impact_four, data_real, 'pre-intervention', intervention)
+#     # # plot_residuals(impact_four, data_real, 'pre-intervention', intervention)
+#     # # plot_autocorrelation(impact_four, data_real, intervention, 40)
+#     # # plot_Partial_ACF(impact_four, data_real, intervention, 40)
+#     # # plot_difference(impact_four, data_real, intervention)
+#     # ME_four, MSE_four, MAPE_four, RMSE_four, MAE_four = analyse_model(impact_four, data_real, intervention)
+#     #
+#     # analysis = pd.DataFrame()
+#     # analysis['trend'] = [trend, trend, trend, trend ]
+#     # analysis['season'] = [season, season, season, season]
+#     # analysis['name'] = ['Four', 'High', 'Medium', 'Low']
+#     # analysis['correlation'] = [correlation[4], correlation[3], correlation[2], correlation[1]]
+#     # analysis['mean_residuals'] = [mean_four, mean_high, mean_medium, mean_low]
+#     # analysis['std_residuals'] = [std_four, std_high, std_medium, std_low]
+#     # analysis['ME'] = [ME_four, ME_high, ME_medium, ME_low]
+#     # analysis['MSE'] = [MSE_four, MSE_high, MSE_medium, MSE_low]
+#     # analysis['MAPE'] = [MAPE_four, MAPE_high, MAPE_medium, MAPE_low]
+#     # analysis['RMSE'] = [RMSE_four, RMSE_high, RMSE_medium, RMSE_low]
+#     # analysis['MAE'] = [MAE_four, MAE_high, MAE_medium, MAE_low]
+#     # print(analysis.to_latex(index=False,
+#     #                   formatters={"name": str.upper},
+#     #                   float_format="{:.3f}".format,
+#     # ))
+#     # print(analysis)

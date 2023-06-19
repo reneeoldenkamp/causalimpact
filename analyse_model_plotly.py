@@ -13,17 +13,20 @@ from scipy import stats
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.figure_factory as ff
+import plotly.io as pio
 
 from statsmodels.stats.diagnostic import acorr_ljungbox
 from sklearn.metrics import mean_absolute_percentage_error
 
 from data_seasonality import make_dataset_year
 
-'''
-Plot the observed data, the control_data and the prediction
-int: time point of intervention
-'''
 def plot_data(model, control_data, int):
+    """ Plot endogeneous and exogenous data and the predicted data by the model
+
+    Parameters
+    -----------
+
+    """
     # Put all data in panda dataframe
     data = pd.DataFrame({'Observed_data': model.inferences['response'],
         'Predicted_data':model.inferences['point_pred'],
@@ -76,15 +79,16 @@ Only before intervention, where the model fits the data
 type: choose between 'pre-intervention', 'post-intervention' and 'whole dataset'
 int: time point of intervention
 '''
-def plot_normal_distributed(model, control_data, type, int):
+
+def plot_normal_distributed(predictions, real_data, type, int):
     if type == 'pre-intervention':
-        residuals = model.inferences['point_pred'][:int] - control_data.squeeze()[:int]
+        residuals = predictions - real_data[int:]
 
     if type == 'post-intervention':
-        residuals = model.inferences['point_pred'][int:] - control_data.squeeze()[int:]
+        residuals = predictions - real_data[int:]
 
     if type == 'whole_dataset':
-        residuals = model.inferences['point_pred'] - control_data.squeeze()
+        residuals = predictions - real_data[int:]
 
     fig = ff.create_distplot([residuals],
         ['Distribution of the residuals'],
@@ -140,9 +144,8 @@ def plot_normal_distributed(model, control_data, type, int):
     # fig.show()
 
     # qq-plot
-    sm.qqplot(model.inferences['point_pred'][:int]
-        - model.inferences['response'][:int], line='45')
-    py.show()
+    # sm.qqplot(predictions - real_data[int:], line='45')
+    # py.show()
     return mean, std
 
 '''
@@ -317,8 +320,8 @@ Plot the autocorrelation
 int: time point of intervention
 lags: number of lags
 '''
-def plot_autocorrelation(model, control_data, int, lags):
-    residuals = model.inferences['point_pred'][:int] - control_data.squeeze()[:int]
+def plot_autocorrelation(predictions, data_real, name, lags):
+    residuals = predictions - data_real
     acf_data, ci = acf(residuals, nlags = lags, alpha=0.05)
 
     data = pd.DataFrame({'ACF': acf_data, 'Lags': range(0,len(acf_data))},
@@ -340,8 +343,6 @@ def plot_autocorrelation(model, control_data, int, lags):
 
     ci_list = []
     for i in range(41):
-        # zou dit niet alle values tot en met -i moeten zijn? ipv alleen -i?
-        # https://www.itl.nist.gov/div898/handbook/eda/section3/autocopl.htm
         ci_list.append(1.96/(np.sqrt(len(residuals)-i)))
     ci_list_lower = list(map(lambda x: -x, ci_list))
 
@@ -368,7 +369,7 @@ def plot_autocorrelation(model, control_data, int, lags):
         font_color  = "black",
         font_size = 30,
         title=dict(
-            text = "Autocorrelation: weekly seasonality. Confidence interval of 95%.",
+            text = "Autocorrelation",
             font_size = 38,
             x = 0.5),
         legend=dict(
@@ -377,15 +378,21 @@ def plot_autocorrelation(model, control_data, int, lags):
             xanchor="left",
             x=0.01)
         )
-    fig.show()
+    # fig.show()
+    # import os
+    # if not os.path.exists("images"):
+    #     os.mkdir("images")
+    # fig.write("images/fig1.png")
+    image_name = "images/"+name+"_ACF.png"
+    pio.write_image(fig, file=image_name, width=1500 , height=1000)
 
 '''
 Plot partial autocorrelation
 int: time point of intervention
 lags: number of lags
 '''
-def plot_Partial_ACF(model, control_data, int, lags):
-    residuals = model.inferences['point_pred'][:int] - control_data.squeeze()[:int]
+def plot_Partial_ACF(predictions, data_real, name, lags):
+    residuals = predictions - data_real
     pacf_data, ci = pacf(residuals, nlags = lags, alpha=0.05)
 
     data = pd.DataFrame(
@@ -435,7 +442,7 @@ def plot_Partial_ACF(model, control_data, int, lags):
         font_color  = "black",
         font_size = 30,
         title=dict(
-            text="Partial Autocorrelation: weekly seasonality. Confidence interval of 95%.",
+            text="Partial Autocorrelation",
             font_size = 38,
             x = 0.5),
         legend=dict(
@@ -444,7 +451,9 @@ def plot_Partial_ACF(model, control_data, int, lags):
             xanchor="left",
             x=0.01)
         )
-    fig.show()
+    # fig.show()
+    image_name = "images/" + name + "_PACF.png"
+    pio.write_image(fig, file=image_name, width=1500 , height=1000)
 
 from operator import sub
 '''
@@ -505,33 +514,42 @@ def plot_difference(model, control_data, int):
 Quantitative measures to analyse the model
 int: time point of intervention
 '''
-def analyse_model(model, control_data, int):
-    control = control_data.squeeze()
-    ME = (np.sum((control[int:] - model.inferences['point_pred'][int:])))/len(control[int:])
-    MSE = (np.sum((control[int:] - model.inferences['point_pred'][int:])**2))/len(control[int:])
-    RMSE = math.sqrt(MSE)
-    MAE = (np.sum(abs(control[int:] - model.inferences['point_pred'][int:])))/len(control[int:])
-    MAPE = mean_absolute_percentage_error(control[int:], model.inferences['point_pred'][int:])
-    residuals = model.inferences['point_pred'][:int] - control_data.squeeze()[:int]
-    residuals = pd.DataFrame({'residuals':residuals}, columns=['residuals'])
-    ljung = []
-    for i in range(20):
-        ljung.append(acorr_ljungbox(residuals, lags=[i+1], return_df=True))
 
-    return ME, MSE, MAPE, RMSE, MAE
+def analyse_model(predictions, data_real, int):
+    """ Quantitative measures to analyse the model
 
-def analyse_model_1(predictions, data_real, int):
-    print(len(predictions), len(data_real[int:]))
+    Parameters
+    ----------
+    predictions:
+        predicted forecast
+    data_real:
+        real values of forecast
+    int:
+        point in dataset of the intervention
+
+    Return
+    ------
+    ME:
+
+    MSE:
+
+    MAPE:
+
+    RMSE:
+
+    MAE:
+    """
+
     ME = (np.sum((data_real[int:] - predictions)))/len(predictions)
     MSE = (np.sum((data_real[int:] - predictions)**2))/len(predictions)
     RMSE = math.sqrt(MSE)
     MAE = (np.sum(abs(data_real[int:] - predictions)))/len(predictions)
     MAPE = mean_absolute_percentage_error(data_real[int:], predictions)
     residuals = predictions - data_real[int:]
-    residuals = pd.DataFrame({'residuals':residuals}, columns=['residuals'])
-    ljung = []
-    for i in range(20):
-        ljung.append(acorr_ljungbox(residuals, lags=[i+1], return_df=True))
+    # residuals = pd.DataFrame({'residuals':residuals}, columns=['residuals'])
+    # ljung = []
+    # for i in range(20):
+    #     ljung.append(acorr_ljungbox(residuals, lags=[i+1], return_df=True))
 
     return ME, MSE, MAPE, RMSE, MAE
 
