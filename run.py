@@ -244,7 +244,7 @@ def run_synthetich_data_ARIMA(data, data_real, seasonality, name, intervention):
     model = pm.auto_arima(train,
                         start_p=1, start_q=1, start_P=3, start_Q=3,
                         max_p=3, max_q=3, max_P=3, max_Q=3, seasonal=True,
-                        stepwise=True, suppress_warnings=True, m=int(seasonality[0]), D=1, max_D=1,
+                        stepwise=True, suppress_warnings=True, m=int(seasonality[0]), D=0, max_D=1,
                         error_action='ignore', trace=True)
     model = model.fit(train, exo_data[:intervention])
     aic = model.aic()
@@ -440,10 +440,11 @@ post_trend = "stationary"
 seasonality = [125.75]#[125.75, 7]
 lags = 40
 runs = 1
-name = trend+"_"+season+"_"
+name = "train_2"+trend+"_"
 # name = "exponetial_season_2"
-data_four, data_high, data_medium, data_low, data_real = make_synthetic_data(datapoints, intervention, trend, season, post_trend)
-data = data_high
+# data_four, data_high, data_medium, data_low, data_real = make_synthetic_data(datapoints, intervention, trend, season, post_trend)
+# data = data_high
+# data = data[:200]
 
 # predictions_ci, data_real, run_time_ci, aic_ci, llf_ci, coef_ci, sterr_ci, pvalues_ci = run_synthetic_data_causalimpact(data, data_real, seasonality, name, intervention)
 # plot_autocorrelation(predictions_ci, data_real[intervention:], name+"CI", lags)
@@ -467,9 +468,11 @@ pvalues_ci_tot, pvalues_ARIMAX_tot = 0, 0
 for i in range(runs):
     data_four, data_high, data_medium, data_low, data_real = make_synthetic_data(datapoints, intervention, trend, season, post_trend)
     data = data_high
+    # data = data[:226]
+    # data_real = data_real[:226]
 
     predictions_ci, data_real, run_time_ci, aic_ci, coef_values, coef_ci, sterr_ci, pvalues_ci = run_synthetic_data_causalimpact(data, data_real, seasonality, name, intervention)
-    # predictions_ARIMAX, data_real, run_time_ARIMAX, aic_ARIMAX, coef_ARIMAX, sterr_ARIMAX, pvalues_ARIMAX = run_synthetich_data_ARIMA(data, data_real, seasonality, name, intervention)
+    predictions_ARIMAX, data_real, run_time_ARIMAX, aic_ARIMAX, coef_ARIMAX, sterr_ARIMAX, pvalues_ARIMAX = run_synthetich_data_ARIMA(data, data_real, seasonality, name, intervention)
     # predictions_xgb, data_real, feature_importance, run_time_xgb = run_synthetic_data_xgboost(data, data_real, seasonality, name, intervention)
     # print(predictions_ARIMAX, data_real)
     ME_ci, MSE_ci, MAPE_ci, RMSE_ci, MAE_ci = analyse_model(predictions_ci, data_real, intervention)
@@ -477,11 +480,11 @@ for i in range(runs):
     plot_autocorrelation(predictions_ci, data_real[intervention:], name+"CI", lags)
     plot_Partial_ACF(predictions_ci, data_real[intervention:], name+"CI", lags)
 
-    # ME_ARIMAX, MSE_ARIMAX, MAPE_ARIMAX, RMSE_ARIMAX, MAE_ARIMAX = analyse_model(predictions_ARIMAX, data_real, intervention)
-    # mean_ARIMAX, std_ARIMAX = plot_normal_distributed(predictions_ARIMAX, data_real, 'pre-intervention', intervention)
-    # plot_autocorrelation(predictions_ARIMAX, data_real[intervention:], name+"ARIMAX", lags)
-    # plot_Partial_ACF(predictions_ARIMAX, data_real[intervention:], name+"ARIMAX", lags)
-    #
+    ME_ARIMAX, MSE_ARIMAX, MAPE_ARIMAX, RMSE_ARIMAX, MAE_ARIMAX = analyse_model(predictions_ARIMAX, data_real, intervention)
+    mean_ARIMAX, std_ARIMAX = plot_normal_distributed(predictions_ARIMAX, data_real, 'pre-intervention', intervention)
+    plot_autocorrelation(predictions_ARIMAX, data_real[intervention:], name+"ARIMAX", lags)
+    plot_Partial_ACF(predictions_ARIMAX, data_real[intervention:], name+"ARIMAX", lags)
+
     # ME_xgb, MSE_xgb, MAPE_xgb, RMSE_xgb, MAE_xgb = analyse_model(predictions_xgb, data_real, intervention)
     # mean_xgb, std_xgb = plot_normal_distributed(predictions_xgb, data_real, 'pre-intervention', intervention)
     # plot_autocorrelation(predictions_xgb, data_real[intervention:], name+"xgb", lags)
@@ -494,13 +497,13 @@ for i in range(runs):
     MAE_ci_tot += MAE_ci
     mean_ci_tot += mean_ci
     std_ci_tot += std_ci
-    # ME_ARIMAX_tot += ME_ARIMAX
-    # MSE_ARIMAX_tot += MSE_ARIMAX
-    # MAPE_ARIMAX_tot += MAPE_ARIMAX
-    # RMSE_ARIMAX_tot += RMSE_ARIMAX
-    # MAE_ARIMAX_tot += MAE_ARIMAX
-    # mean_ARIMAX_tot += mean_ARIMAX
-    # std_ARIMAX_tot += std_ARIMAX
+    ME_ARIMAX_tot += ME_ARIMAX
+    MSE_ARIMAX_tot += MSE_ARIMAX
+    MAPE_ARIMAX_tot += MAPE_ARIMAX
+    RMSE_ARIMAX_tot += RMSE_ARIMAX
+    MAE_ARIMAX_tot += MAE_ARIMAX
+    mean_ARIMAX_tot += mean_ARIMAX
+    std_ARIMAX_tot += std_ARIMAX
     # ME_xgb_tot += ME_xgb
     # MSE_xgb_tot += MSE_xgb
     # MAPE_xgb_tot += MAPE_xgb
@@ -509,17 +512,17 @@ for i in range(runs):
     # mean_xgb_tot += mean_xgb
     # std_xgb_tot = std_xgb
     run_time_ci_tot += run_time_ci
-    # run_time_ARIMAX_tot += run_time_ARIMAX
+    run_time_ARIMAX_tot += run_time_ARIMAX
     # run_time_xgb_tot += run_time_xgb
     aic_ci_tot += aic_ci
-    # aic_ARIMAX_tot += aic_ARIMAX
+    aic_ARIMAX_tot += aic_ARIMAX
     coef_ci_tot += coef_ci
-    # coef_ARIMAX_tot += coef_ARIMAX['exo_data']
+    coef_ARIMAX_tot += coef_ARIMAX['exo_data']
     # coef_xgb_tot += feature_importance
     sterr_ci_tot += sterr_ci
-    # sterr_ARIMAX_tot += sterr_ARIMAX['exo_data']
+    sterr_ARIMAX_tot += sterr_ARIMAX['exo_data']
     pvalues_ci_tot += pvalues_ci
-    # pvalues_ARIMAX_tot += pvalues_ARIMAX['exo_data']
+    pvalues_ARIMAX_tot += pvalues_ARIMAX['exo_data']
 
 analysis = pd.DataFrame()
 analysis['Trend'] = [trend, trend, trend]
@@ -545,14 +548,14 @@ table = analysis.to_latex(index=False,
                   float_format="{:.3f}".format,
 )
 print(table)
-# coef_ARIMAX = coef_ARIMAX.to_latex(index=True,
-#                   formatters={"name": str.upper},
-#                   float_format="{:.3f}".format,)
+coef_ARIMAX = coef_ARIMAX.to_latex(index=True,
+                  formatters={"name": str.upper},
+                  float_format="{:.3f}".format,)
 coef_ci = coef_values.to_latex(index=True,
                   formatters={"name": str.upper},
                   float_format="{:.3f}".format,)
 outF = open("images/"+name+".txt", "w")
 outF.write(table)
 outF.write(coef_ci)
-# outF.write(coef_ARIMAX)
+outF.write(coef_ARIMAX)
 outF.close()

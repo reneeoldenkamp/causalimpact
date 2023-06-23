@@ -1,0 +1,42 @@
+\begin{tabular}{lrrrrr}
+\toprule
+       Model &  MAPE &   RMSE &   MAE &      AIC &  Run time \\
+\midrule
+CausalImpact & 0.238 & 13.093 & 9.925 & 1016.123 &     1.547 \\
+      ARIMAX & 0.201 & 11.133 & 8.573 &  840.148 &  3141.061 \\
+     XGBoost & 0.176 &  9.768 & 7.751 &    0.000 &     0.066 \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lrrr}
+\toprule
+{} &   coef &  std\_err &  pvalues \\
+Name                        &        &          &          \\
+\midrule
+sigma2.irregular            &  0.209 &    4.347 &    0.962 \\
+sigma2.level                &  0.015 &    9.331 &    0.999 \\
+sigma2.trend                & 24.245 &   13.697 &    0.077 \\
+sigma2.freq\_seasonal\_365(1) &  2.353 &    9.318 &    0.801 \\
+beta.x1                     & -0.018 &    0.043 &    0.671 \\
+beta.x2                     & -0.193 &    0.322 &    0.550 \\
+beta.x3                     & -0.000 &    0.001 &    0.671 \\
+beta.x4                     &  0.011 &    0.020 &    0.595 \\
+beta.x5                     & -0.003 &    0.010 &    0.723 \\
+beta.x6                     & -0.038 &    0.072 &    0.596 \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lr}
+\toprule
+{} &      0 \\
+\midrule
+FG     & -0.013 \\
+TG     &  0.116 \\
+Q      & -0.001 \\
+DR     & -0.027 \\
+RH     &  0.006 \\
+UG     & -0.039 \\
+ar.L1  & -0.209 \\
+ma.L1  & -1.500 \\
+ma.L2  &  0.539 \\
+sigma2 &  7.411 \\
+\bottomrule
+\end{tabular}

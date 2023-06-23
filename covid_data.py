@@ -97,21 +97,21 @@ def data_plot(df):
     """
     lockdown = '2020-10-14'
     fig = go.Figure()
-    # fig.add_trace(go.Scatter(x = df['Date'],
-    #     y = df['FG'],
-    #     mode = 'lines',
-    #     name = "Etmaal gemiddelde windsnelheid" ,
-    #     line = dict(color='orange')))
-    # fig.add_trace(go.Scatter(x = df['Date'],
-    #     y = df['TG'],
-    #     mode = 'lines',
-    #     name = "Etmaalgemiddelde temperatuur",
-    #     line = dict(color='red')))
-    # fig.add_trace(go.Scatter(x = df['Date'],
-    #     y = df['UG'],
-    #     mode = 'lines',
-    #     name = "Etmaalgemiddelde relatieve vochtigheid",
-    #     line = dict(color='gray')))
+    fig.add_trace(go.Scatter(x = df['Date'],
+        y = df['FG'],
+        mode = 'lines',
+        name = "Etmaal gemiddelde windsnelheid" ,
+        line = dict(color='orange')))
+    fig.add_trace(go.Scatter(x = df['Date'],
+        y = df['TG'],
+        mode = 'lines',
+        name = "Etmaalgemiddelde temperatuur",
+        line = dict(color='red')))
+    fig.add_trace(go.Scatter(x = df['Date'],
+        y = df['UG'],
+        mode = 'lines',
+        name = "Etmaalgemiddelde relatieve vochtigheid",
+        line = dict(color='gray')))
     fig.add_trace(go.Scatter(x = df.index,
         y = df['IC_admission'],
         mode = 'lines',
@@ -146,16 +146,16 @@ def data_plot(df):
     fig.add_annotation(x='2020-05-01', y=126, text='2020-05-01', showarrow=False, xanchor='center',
                        font=dict(color='purple'))
 
-    # fig.add_trace(go.Scatter(x = df['Date'],
-    #     y = df['RH'],
-    #     mode = 'lines',
-    #     name = 'Etmaalsom neerslag',
-    #     line = dict(color='blue')))
-    # fig.add_trace(go.Scatter(x = df['Date'],
-    #     y = df['DR'],
-    #     mode = 'lines',
-    #     name = 'Duur van de neerslag',
-    #     line = dict(color='green')))
+    fig.add_trace(go.Scatter(x = df['Date'],
+        y = df['RH'],
+        mode = 'lines',
+        name = 'Etmaalsom neerslag',
+        line = dict(color='blue')))
+    fig.add_trace(go.Scatter(x = df['Date'],
+        y = df['DR'],
+        mode = 'lines',
+        name = 'Duur van de neerslag',
+        line = dict(color='green')))
     fig.update_layout(
         title="Covid-19 Data",
         xaxis_title="Date",
@@ -614,21 +614,28 @@ def run_covid_data_xgb(data, data_real, lockdown, intervention_1, name, end_date
 
 
 df_IC, df_weather, df, df_second_wave = data_loader()
-df.set_index("Date", inplace=True)
+# shift weather data
+df_weather = df_weather.shift(periods=-20, fill_value=0)
+df = pd.concat([df_IC, df_weather], axis=1)
+# data_plot(df[:'2020-11-30'])
+# print(df)
+# df.set_index("Date", inplace=True)
+
 # data_plot(df[:'2020-12-14'])
-df_second_wave.set_index("Date", inplace=True)
+# df_second_wave.set_index("Date", inplace=True)
 # data_real = df_second_wave['IC_admission']
 # df =df['2020-03-30':'2020-10-14']
-df =df_second_wave
+# df = df_second_wave
+df = df['2020-05-01':'2020-11-30']
 data_real = df['IC_admission']
 
 lockdown = '2020-10-14'
-intervention = '2020-09-16'
-end_date = '2020-10-07'
-int_1 = '2020-09-17'
+intervention = '2020-10-14'
+end_date = '2020-11-24'
+int_1 = '2020-10-15'
 runs = 1
-# name = "real"
-name = 'val2_3'
+name = "shift_real_20days"
+# name = 'shift_seas1_val2'
 lags = 20
 
 predictions_ci, data_real, run_time_ci, aic_ci, coef_values, coef_ci, sterr_ci, pvalues_ci = run_covid_data_causalimpact(
@@ -648,6 +655,7 @@ ME_ARIMAX, MSE_ARIMAX, MAPE_ARIMAX, RMSE_ARIMAX, MAE_ARIMAX = analyse_model(pred
 # mean_ARIMAX, std_ARIMAX = plot_normal_distributed(predictions_ARIMAX, data_real, 'pre-intervention', intervention)
 plot_autocorrelation(predictions_ARIMAX, data_real[intervention:], name+"ARIMAX", lags)
 plot_Partial_ACF(predictions_ARIMAX, data_real[intervention:], name+"ARIMAX", lags)
+
 predictions_xgb = predictions_xgb[1:]
 ME_xgb, MSE_xgb, MAPE_xgb, RMSE_xgb, MAE_xgb = analyse_model(predictions_xgb, data_real[:end_date], int_1)
 # mean_xgb, std_xgb = plot_normal_distributed(predictions_xgb, data_real, 'pre-intervention', intervention)
@@ -664,8 +672,8 @@ analysis['Model'] = ['CausalImpact', 'ARIMAX', 'XGBoost']
 # analysis['Runs'] = [runs, runs, runs]
 # analysis['mean_residuals'] = [mean_ci, mean_ARIMAX, mean_xgb]
 # analysis['std_residuals'] = [std_ci, std_ARIMAX, std_xgb]
-# analysis['ME'] = [ME_ci_tot/runs, ME_ARIMAX_tot/runs, ME_xgb_tot/runs]
-# analysis['MSE'] = [MSE_ci_tot/runs, MSE_ARIMAX_tot/runs, MSE_xgb_tot/runs]
+# analysis['ME'] = [ME_ci_tot, ME_ARIMAX_tot, ME_xgb_tot]
+# analysis['MSE'] = [MSE_ci_tot, MSE_ARIMAX_tot, MSE_xgb_tot]
 analysis['MAPE'] = [MAPE_ci, MAPE_ARIMAX, MAPE_xgb]
 analysis['RMSE'] = [RMSE_ci, RMSE_ARIMAX, RMSE_xgb]
 analysis['MAE'] = [MAE_ci, MAE_ARIMAX, MAE_xgb]

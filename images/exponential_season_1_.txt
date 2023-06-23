@@ -1,10 +1,10 @@
 \begin{tabular}{lllrrrrrrrrrr}
 \toprule
-      Trend &   Season &        Model &  mean\_residuals &  std\_residuals &  MAPE &   RMSE &    MAE &    AIC &  Beta coef &  std err &  Beta P>|z| &  Run time \\
+      Trend &   Season &        Model &  mean\_residuals &  std\_residuals &  MAPE &   RMSE &    MAE &     AIC &  Beta coef &  std err &  Beta P>|z| &  Run time \\
 \midrule
-exponential & season\_1 & CausalImpact &          18.444 &         15.663 & 0.022 & 24.197 & 21.547 & 89.731 &      0.005 &   15.663 &       0.477 &     0.711 \\
-exponential & season\_1 &       ARIMAX &           0.000 &          0.000 & 0.000 &  0.000 &  0.000 &  0.000 &      0.000 &    0.000 &       0.000 &     0.000 \\
-exponential & season\_1 &      XGBoost &           0.000 &          0.000 & 0.000 &  0.000 &  0.000 &  0.000 &      0.000 &    0.000 &       0.000 &     0.000 \\
+exponential & season\_1 & CausalImpact &           1.800 &         17.230 & 0.014 & 17.323 & 13.635 & 100.519 &      0.004 &   17.230 &       0.594 &     0.788 \\
+exponential & season\_1 &       ARIMAX &           0.000 &          0.000 & 0.000 &  0.000 &  0.000 &   0.000 &      0.000 &    0.000 &       0.000 &     0.000 \\
+exponential & season\_1 &      XGBoost &           0.000 &          0.000 & 0.000 &  0.000 &  0.000 &   0.000 &      0.000 &    0.000 &       0.000 &     0.000 \\
 \bottomrule
 \end{tabular}
 \begin{tabular}{lrrr}
@@ -12,10 +12,10 @@ exponential & season\_1 &      XGBoost &           0.000 &          0.000 & 0.00
 {} &  coef &  std\_err &  pvalues \\
 Name                           &       &          &          \\
 \midrule
-sigma2.irregular               & 0.057 &    0.004 &    0.000 \\
+sigma2.irregular               & 0.059 &    0.004 &    0.000 \\
 sigma2.level                   & 0.000 &    0.000 &    1.000 \\
-sigma2.trend                   & 0.000 &    0.000 &    0.206 \\
-sigma2.freq\_seasonal\_125.75(1) & 0.000 &    0.000 &    0.365 \\
-beta.x1                        & 0.005 &    0.008 &    0.477 \\
+sigma2.trend                   & 0.000 &    0.000 &    0.164 \\
+sigma2.freq\_seasonal\_125.75(1) & 0.000 &    0.000 &    0.312 \\
+beta.x1                        & 0.004 &    0.008 &    0.594 \\
 \bottomrule
 \end{tabular}
