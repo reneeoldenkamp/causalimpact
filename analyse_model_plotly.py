@@ -321,8 +321,12 @@ int: time point of intervention
 lags: number of lags
 '''
 def plot_autocorrelation(predictions, data_real, name, lags):
+    # print(predictions, data_real)
     residuals = predictions - data_real
+    print(len(residuals))
+    # print(residuals)
     acf_data, ci = acf(residuals, nlags = lags, alpha=0.05)
+    # print(acf_data)
 
     data = pd.DataFrame({'ACF': acf_data, 'Lags': range(0,len(acf_data))},
         columns =['ACF', 'Lags'])
@@ -342,7 +346,7 @@ def plot_autocorrelation(predictions, data_real, name, lags):
         showlegend=False))
 
     ci_list = []
-    for i in range(41):
+    for i in range(lags+1):
         ci_list.append(1.96/(np.sqrt(len(residuals)-i)))
     ci_list_lower = list(map(lambda x: -x, ci_list))
 
