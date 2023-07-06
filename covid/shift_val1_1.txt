@@ -1,10 +1,10 @@
-\begin{tabular}{lrrrrr}
+\begin{tabular}{lrrrrrrr}
 \toprule
-       Model &  MAPE &  RMSE &   MAE &     AIC &  Run time \\
+       Model &  mean\_residuals &  std\_residuals &  MAPE &  RMSE &   MAE &     AIC &  Run time \\
 \midrule
-CausalImpact & 0.713 & 2.755 & 2.394 & 587.468 &     1.133 \\
-      ARIMAX & 0.616 & 1.549 & 1.502 & 495.253 &  2270.257 \\
-     XGBoost & 0.709 & 2.282 & 2.067 &   0.000 &     0.043 \\
+CausalImpact &          -2.394 &          1.363 & 0.713 & 2.755 & 2.394 & 587.468 &     1.437 \\
+      ARIMAX &          -0.984 &          1.196 & 0.616 & 1.549 & 1.502 & 495.253 &  2536.911 \\
+     XGBoost &          -1.672 &          1.507 & 0.705 & 2.251 & 2.041 &   0.000 &     0.043 \\
 \bottomrule
 \end{tabular}
 \begin{tabular}{lrrr}

@@ -630,13 +630,13 @@ df = df['2020-05-01':'2020-11-30']
 data_real = df['IC_admission']
 
 lockdown = '2020-10-14'
-intervention = '2020-09-23'
+intervention = '2020-10-07'
 end_date = '2020-10-14'
-int_1 = '2020-09-24'
+int_1 = '2020-10-08'
 runs = 1
 # name = "shift_real_20days"
 # name = 'shift_seas1_val2'
-name = 'test'
+name = 'shift_val5_1'
 lags = 40
 
 predictions_ci, data_real, run_time_ci, aic_ci, coef_values, coef_ci, sterr_ci, pvalues_ci = run_covid_data_causalimpact(
@@ -647,21 +647,20 @@ predictions_xgb, data_real, feature_importance, run_time_xgb = run_covid_data_xg
 
 predictions_ci = predictions_ci[int_1:]
 ME_ci, MSE_ci, MAPE_ci, RMSE_ci, MAE_ci = analyse_model(predictions_ci, data_real[:end_date], int_1)
-mean_ci, std_ci = plot_normal_distributed(predictions_ci, data_real, 'pre-intervention', intervention)
+mean_ci, std_ci = plot_normal_distributed(predictions_ci, data_real[:end_date], 'pre-intervention', int_1)
 
 plot_autocorrelation(predictions_ci, data_real[int_1:end_date], name+"CI", lags)
-plot_Partial_ACF(predictions_ci, data_real[int_1:end_date], name+"CI", 9)
-
+plot_Partial_ACF(predictions_ci, data_real[int_1:end_date], name+"CI", 2)
 
 ME_ARIMAX, MSE_ARIMAX, MAPE_ARIMAX, RMSE_ARIMAX, MAE_ARIMAX = analyse_model(predictions_ARIMAX, data_real[:end_date], int_1)
-mean_ARIMAX, std_ARIMAX = plot_normal_distributed(predictions_ARIMAX, data_real, 'pre-intervention', intervention)
-plot_autocorrelation(predictions_ARIMAX, data_real[intervention:end_date], name+"ARIMAX", lags)
-plot_Partial_ACF(predictions_ARIMAX, data_real[intervention:end_date], name+"ARIMAX", lags)
+mean_ARIMAX, std_ARIMAX = plot_normal_distributed(predictions_ARIMAX, data_real[:end_date], 'pre-intervention', int_1)
+plot_autocorrelation(predictions_ARIMAX, data_real[int_1:end_date], name+"ARIMAX", lags)
+plot_Partial_ACF(predictions_ARIMAX, data_real[int_1:end_date], name+"ARIMAX", 2)
 
 predictions_xgb = predictions_xgb[1:]
 ME_xgb, MSE_xgb, MAPE_xgb, RMSE_xgb, MAE_xgb = analyse_model(predictions_xgb, data_real[:end_date], int_1)
-mean_xgb, std_xgb = plot_normal_distributed(predictions_xgb, data_real, 'pre-intervention', intervention)
-plot_autocorrelation(predictions_xgb, data_real[int_1:end_date], name+"xgb", 2)
+mean_xgb, std_xgb = plot_normal_distributed(predictions_xgb, data_real[:end_date], 'pre-intervention', int_1)
+plot_autocorrelation(predictions_xgb, data_real[int_1:end_date], name+"xgb", lags)
 plot_Partial_ACF(predictions_xgb, data_real[int_1:end_date], name+"xgb", 2)
 #
 # MAPE_ARIMAX, MAPE_xgb = 0, 0
