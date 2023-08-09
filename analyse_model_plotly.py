@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.stattools import acf, pacf
-from causalimpact import CausalImpact
 from scipy import stats
 
 import plotly.express as px
@@ -326,6 +325,7 @@ def plot_autocorrelation(predictions, data_real, name, lags):
     print(len(residuals))
     # print(residuals)
     acf_data, ci = acf(residuals, nlags = lags, alpha=0.05)
+    print("HALLPO", ci)
     # print(acf_data)
 
     data = pd.DataFrame({'ACF': acf_data, 'Lags': range(0,len(acf_data))},
@@ -347,8 +347,10 @@ def plot_autocorrelation(predictions, data_real, name, lags):
 
     ci_list = []
     for i in range(lags+1):
-        ci_list.append(1.96/(np.sqrt(len(residuals)-i)))
+        # ci_list.append(1.96/(np.sqrt(len(residuals)-i)))
+        ci_list.append(2/np.sqrt(len(residuals)))
     ci_list_lower = list(map(lambda x: -x, ci_list))
+
 
     fig.add_trace(go.Scatter(
         x = data['Lags'][1:],
@@ -367,14 +369,14 @@ def plot_autocorrelation(predictions, data_real, name, lags):
         fill='tonexty',
         showlegend=False))
     fig.update_layout(
-        xaxis_title="Time points",
-        yaxis_title="New IC admisssions",
+        xaxis_title="Lag",
+        yaxis_title="ACF",
         font_family = "Arial",
         font_color  = "black",
-        font_size = 30,
+        font_size = 40,
         title=dict(
-            text = "Autocorrelation",
-            font_size = 38,
+            text = "Autocorrelation Function (ACF)",
+            font_size = 48,
             x = 0.5),
         legend=dict(
             yanchor="top",
@@ -556,30 +558,3 @@ def analyse_model(predictions, data_real, int):
     #     ljung.append(acorr_ljungbox(residuals, lags=[i+1], return_df=True))
 
     return ME, MSE, MAPE, RMSE, MAE
-
-# set up for dataset
-# datapoints = 364
-# int = 250
-# lags = 40
-# #
-# data, pre_period, post_period, control_data = make_dataset_year(datapoints, 12, int, True, True)
-# impact = CausalImpact(data, control_data, pre_period, post_period, model_args={'freq_seasonal': [{'period':200, 'harmonics':1}]})
-# impact.run()
-# impact.summary()
-# impact.plot(control_data)
-#
-# # Call functions to plot
-# plot_data(impact, control_data, int)
-# plot_normal_distributed(impact, 'whole dataset', int)
-# plot_normal_distributed(impact, 'pre-intervention', int)
-# plot_normal_distributed(impact, 'post-intervention', int)
-# plot_control_data(impact, 'post-intervention', int)
-# plot_control_data(impact, 'pre-intervention', int)
-# plot_control_data(impact, 'whole dataset', int)
-# plot_residuals(impact, 'post-intervention', int)
-# plot_residuals(impact, 'pre-intervention', int)
-# plot_residuals(impact, 'whole dataset', int)
-# plot_autocorrelation(impact, int, lags)
-# plot_Partial_ACF(impact, int, lags)
-# plot_difference(impact, int)
-# analyse_model(impact, int)

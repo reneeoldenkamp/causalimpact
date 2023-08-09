@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 
 from statsmodels.graphics.tsaplots import plot_acf, plot_pacf
 from statsmodels.tsa.stattools import acf, pacf
-from causalimpact import CausalImpact
+# from causalimpact import CausalImpact
 from scipy import stats
 
 '''

@@ -1,42 +1,58 @@
-\begin{tabular}{lrrrrrrr}
+\begin{tabular}{lrrrrrrrr}
 \toprule
-       Model &  mean\_residuals &  std\_residuals &  MAPE &   RMSE &   MAE &     AIC &  Run time \\
+Model & mean_residuals & std_residuals & MAPE & RMSE & MAE & AIC & Run time & mean \\
 \midrule
-CausalImpact &          -8.804 &          4.464 & 0.621 &  9.871 & 8.909 & 586.438 &     0.749 \\
-      ARIMAX &          -8.756 &          4.430 & 0.632 &  9.813 & 8.929 & 558.925 &  2571.088 \\
-     XGBoost &          -9.383 &          3.863 & 0.667 & 10.148 & 9.383 &   0.000 &     0.042 \\
+CausalImpact & -8.845 & 4.474 & 0.624 & 9.912 & 8.949 & 613.533 & 0.355 & 4.441 \\
+ARIMAX & -8.756 & 4.430 & 0.632 & 9.813 & 8.929 & 558.925 & 2708.822 & 4.529 \\
+XGBoost & -9.429 & 3.883 & 0.670 & 10.197 & 9.429 & 0.000 & 0.028 & 31.173 \\
 \bottomrule
 \end{tabular}
 \begin{tabular}{lrrr}
 \toprule
-{} &   coef &  std\_err &  pvalues \\
-Name                        &        &          &          \\
+ & coef & std_err & pvalues \\
+Name &  &  &  \\
 \midrule
-sigma2.irregular            &  1.488 &    0.357 &    0.000 \\
-sigma2.level                &  0.010 &  313.445 &    1.000 \\
-sigma2.trend                &  0.000 &    0.327 &    0.999 \\
-sigma2.freq\_seasonal\_365(1) &  0.950 &  313.984 &    0.998 \\
-beta.x1                     &  0.022 &    0.019 &    0.233 \\
-beta.x2                     & -0.122 &    0.086 &    0.156 \\
-beta.x3                     & -0.000 &    0.000 &    0.603 \\
-beta.x4                     & -0.001 &    0.011 &    0.930 \\
-beta.x5                     &  0.003 &    0.006 &    0.621 \\
-beta.x6                     & -0.036 &    0.031 &    0.253 \\
+sigma2.irregular & 1.345 & 0.292 & 0.000 \\
+sigma2.level & 0.010 & 203.577 & 1.000 \\
+sigma2.trend & 0.000 & 0.213 & 0.999 \\
+sigma2.freq_seasonal_365(1) & 0.917 & 203.930 & 0.996 \\
+beta.x1 & 0.053 & 0.015 & 0.001 \\
+beta.x2 & -0.158 & 0.075 & 0.036 \\
+beta.x3 & 0.001 & 0.000 & 0.007 \\
+beta.x4 & 0.021 & 0.008 & 0.006 \\
+beta.x5 & 0.001 & 0.004 & 0.872 \\
+beta.x6 & 0.040 & 0.029 & 0.164 \\
 \bottomrule
 \end{tabular}
 \begin{tabular}{lr}
 \toprule
-{} &      0 \\
+ & 0 \\
 \midrule
-FG     &  0.009 \\
-TG     & -0.046 \\
-Q      & -0.000 \\
-DR     & -0.005 \\
-RH     &  0.004 \\
-UG     & -0.024 \\
-ar.L1  &  0.117 \\
-ma.L1  & -0.929 \\
-ma.L2  &  0.213 \\
-sigma2 &  2.911 \\
+FG & 0.009 \\
+TG & -0.046 \\
+Q & -0.000 \\
+DR & -0.005 \\
+RH & 0.004 \\
+UG & -0.024 \\
+ar.L1 & 0.117 \\
+ma.L1 & -0.929 \\
+ma.L2 & 0.213 \\
+sigma2 & 2.911 \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lr}
+\toprule
+ & 0 \\
+\midrule
+FG & 0.018 \\
+TG & 0.072 \\
+Q & 0.000 \\
+DR & 0.012 \\
+RH & 0.007 \\
+UG & 0.026 \\
+ar.L1 & 0.716 \\
+ma.L1 & 0.693 \\
+ma.L2 & 0.493 \\
+sigma2 & 0.332 \\
 \bottomrule
 \end{tabular}

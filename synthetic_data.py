@@ -1,8 +1,10 @@
-eimport numpy as np
+import numpy as np
 import pandas as pd
 
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
+
+from plotly.subplots import make_subplots
 
 import plotly.graph_objects as go
 
@@ -110,6 +112,7 @@ def gen_dataset(datapoints, trend, seasonality, int, post_int):
     data_int[zero_values_int] = 0
 
     subtitle = "Trend pre-intervention: " + trend + ", Seasonality: "+ season_name + ", Trend post-intervention: "+ post_int + ", Intervention: " + str(int)
+
 
     # # Plot components
     # components['season_1'] = season_year
@@ -255,114 +258,67 @@ def gen_exo_data(datapoints, int, method, trend, season, post_trend):
     return data_real, data_int, exo_data_1, exo_data_2, exo_data_3, exo_data_4, corr['control_data']
 
 #
-# datapoints = 600
-# int = 500
-# trend = "linear"
-# season = "season_1"
-# post_trend = "linear"
-# lags = 40
-# data_real, data_int, exo_data_1, exo_data_2, exo_data_3, exo_data_4, correlation = gen_exo_data(datapoints,
-#                                                                                                 int,
-#                                                                                                 "pearson", trend,
-#                                                                                                 season, post_trend)
-#
-# from causalimpact import CausalImpact
-# # data = pd.DataFrame({
-# #     'data_int':data_int, 'exo_data_1':exo_data_1, 'exo_data_2':exo_data_2,
-# #     'exo_data_3':exo_data_3, 'exo_data_4':exo_data_4},
-# #     columns = ['data_int', 'exo_data_1', 'exo_data_2', 'exo_data_3', 'exo_data_4'])
-#
-# data_high = pd.DataFrame({'data_int': data_int, 'exo_data_3': exo_data_3}, columns=['data_int', 'exo_data_3'])
-# # data_medium = pd.DataFrame({'data_int':data_int, 'exo_data_2':exo_data_2}, columns=['data_int', 'exo_data_2'])
-# # data_low = pd.DataFrame({'data_int':data_int, 'exo_data_1':exo_data_1}, columns=['data_int', 'exo_data_1'])
-# #
-# # # impact_four = CausalImpact(data, data_real, [0, intervention], [intervention+1, datapoints-1],
-# # #         model_args={'level':'lltrend', 'trend':'lltrend', 'nseasons':0, 'exponential':True, 'standardize_data':False})
-# #
-# impact_high = CausalImpact(data_high, data_real, [0, int], [int+1, datapoints-1],
-#         model_args={'level':'lltrend', 'trend':'lltrend', 'week_season':True,
-#         'freq_seasonal':[{'period':112, 'harmonics':1}], 'exponential':True, 'standardize_data':False})
-#
-# # # impact_medium = CausalImpact(data_medium, data_real, [0, intervention], [intervention+1, datapoints-1],
-# # #         model_args={'level':'lltrend', 'trend':'lltrend',
-# # #         'freq_seasonal':[{'period':200, 'harmonics':1}],'nseasons':1, 'exponential':True,'standardize_data':False})
-# # #
-# # # impact_low = CausalImpact(data_low, data_real, [0, intervention], [intervention+1, datapoints-1],
-# # #         model_args={'level':'lltrend', 'trend':'lltrend',
-# # #         'freq_seasonal':[{'period':200, 'harmonics':1}],'nseasons':1, 'exponential':True,'standardize_data':False})
-# #
-# # #
-# # # impact_low.run()
-# # # impact_low.summary()
-# # # impact_low.plot(data_real)
-# # #
-# # # impact_medium.run()
-# # # impact_medium.summary()
-# # # impact_medium.plot(data_real)
-# # #
-# impact_high.run()
-# impact_high.summary()
-# impact_high.plot(data_real)
-#
-# # predictions = impact_high.inferences['point_pred'][int:]
-# # #
-# # # impact_four.run()
-# # # impact_four.summary()
-# # # impact_four.plot(data_real)
-#
-#
-#
-#
-#
-#     # # plot_data(impact_low, data_real, intervention)
-#     # mean_low, std_low = plot_normal_distributed(impact_low, data_real, 'pre-intervention', intervention)
-#     # # plot_residuals(impact_low, data_real, 'pre-intervention', intervention)
-#     # # plot_autocorrelation(impact_low, data_real, intervention, 40)
-#     # # plot_Partial_ACF(impact_low, data_real, intervention, 40)
-#     # # plot_difference(impact_low, data_real, intervention)
-#     # # analyse_model(impact_low, data_real, intervention)
-#     # ME_low, MSE_low, MAPE_low, RMSE_low, MAE_low = analyse_model(impact_low, data_real, intervention)
-#     #
-#     # # plot_data(impact_medium, data_real, intervention)
-#     # mean_medium, std_medium = plot_normal_distributed(impact_medium, data_real, 'pre-intervention', intervention)
-#     # # plot_residuals(impact_medium, 'pre-intervention', intervention)
-#     # # plot_autocorrelation(impact_medium, data_real, intervention, 40)
-#     # # plot_Partial_ACF(impact_medium, data_real, intervention, 40)
-#     # # plot_difference(impact_medium, data_real, intervention)
-#     # # analyse_model(impact_medium, data_real, intervention)
-#     # ME_medium, MSE_medium, MAPE_medium, RMSE_medium, MAE_medium = analyse_model(impact_medium, data_real, intervention)
-#     #
-#     # # plot_data(impact_high, data_real, intervention)
-#     # mean_high, std_high = plot_normal_distributed(impact_high, data_real, 'pre-intervention', intervention)
-#     # # plot_residuals(impact_high, 'pre-intervention', intervention)
-#     # # plot_autocorrelation(impact_high, data_real, intervention, 40)
-#     # # plot_Partial_ACF(impact_high, data_real, intervention, 40)
-#     # # plot_difference(impact_high, data_real, intervention)
-#     # # analyse_model(impact_high, data_real, intervention)
-#     # ME_high, MSE_high, MAPE_high, RMSE_high, MAE_high = analyse_model(impact_high, data_real, intervention)
-#     #
-#     # # plot_data(impact_four, data_real, intervention)
-#     # mean_four, std_four = plot_normal_distributed(impact_four, data_real, 'pre-intervention', intervention)
-#     # # plot_residuals(impact_four, data_real, 'pre-intervention', intervention)
-#     # # plot_autocorrelation(impact_four, data_real, intervention, 40)
-#     # # plot_Partial_ACF(impact_four, data_real, intervention, 40)
-#     # # plot_difference(impact_four, data_real, intervention)
-#     # ME_four, MSE_four, MAPE_four, RMSE_four, MAE_four = analyse_model(impact_four, data_real, intervention)
-#     #
-#     # analysis = pd.DataFrame()
-#     # analysis['trend'] = [trend, trend, trend, trend ]
-#     # analysis['season'] = [season, season, season, season]
-#     # analysis['name'] = ['Four', 'High', 'Medium', 'Low']
-#     # analysis['correlation'] = [correlation[4], correlation[3], correlation[2], correlation[1]]
-#     # analysis['mean_residuals'] = [mean_four, mean_high, mean_medium, mean_low]
-#     # analysis['std_residuals'] = [std_four, std_high, std_medium, std_low]
-#     # analysis['ME'] = [ME_four, ME_high, ME_medium, ME_low]
-#     # analysis['MSE'] = [MSE_four, MSE_high, MSE_medium, MSE_low]
-#     # analysis['MAPE'] = [MAPE_four, MAPE_high, MAPE_medium, MAPE_low]
-#     # analysis['RMSE'] = [RMSE_four, RMSE_high, RMSE_medium, RMSE_low]
-#     # analysis['MAE'] = [MAE_four, MAE_high, MAE_medium, MAE_low]
-#     # print(analysis.to_latex(index=False,
-#     #                   formatters={"name": str.upper},
-#     #                   float_format="{:.3f}".format,
-#     # ))
-#     # print(analysis)
+datapoints = 600
+int = 500
+trend = "stationary"
+season = "season_0"
+post_trend = "stationary"
+lags = 40
+data, data_int, subtitle = gen_dataset(datapoints, trend, season, int, post_trend)
+data_2, data_int_2, subtitle_2 = gen_dataset(datapoints, 'linear', 'season_1', int, 'linear')
+data_3, data_int_3, subtitle_3 = gen_dataset(datapoints, 'exponential', 'season_2', int, 'exponential')
+
+
+fig = make_subplots(rows = 1, cols = 3,
+    subplot_titles=('Stationary trend, no season', 'Linear trend, year season', 'Exponential trend, year and week season'))
+fig.add_trace(go.Scatter(
+    x=np.arange(len(data_int)),
+    y=data_int,
+    mode='lines',
+    line=dict(color='blue'),
+    name='Synthetic data'
+    ), row=1, col=1)
+fig.add_vline(x=500, line_width=2, line_dash="dash", line_color="purple", row=1, col=1)
+fig.add_annotation(x=500, y=4.5, text='Intervention', showarrow=False, xanchor='center',
+                       font=dict(color='purple'), row=1, col=1)
+
+fig.add_trace(go.Scatter(
+    x=np.arange(len(data_int_2)),
+    y=data_int_2,
+    mode='lines',
+    line=dict(color='blue'),
+    name='Synthetic data'
+    ), row=1, col=2)
+fig.add_vline(x=500, line_width=2, line_dash="dash", line_color="purple", row=1, col=2)
+fig.add_annotation(x=500, y=5, text='Intervention', showarrow=False, xanchor='center',
+                       font=dict(color='purple'), row=1, col=2)
+
+fig.add_trace(go.Scatter(
+    x=np.arange(len(data_int_3)),
+    y=data_int_3,
+    mode='lines',
+    line=dict(color='blue'),
+    name='Synthetic data'
+    ), row=1, col=3)
+fig.add_vline(x=500, line_width=2, line_dash="dash", line_color="purple", row=1, col=3)
+fig.add_annotation(x=500, y=0, text='Intervention', showarrow=False, xanchor='center',
+                       font=dict(color='purple'), row=1, col=3)
+
+fig.update_layout(
+    title_text='Examples of generated synthetic data',
+    hovermode="x",
+    font_size=22,
+    title=dict(
+        font_size=35,
+        x=0.5),
+    showlegend=False
+)
+for i in fig['layout']['annotations']:
+    i['font'] = dict(size=25)
+fig.update_yaxes(title_text="Number of new ICU admissions", row=1, col=1)
+
+fig.update_xaxes(title_text="Date", row=1, col=1)
+fig.update_xaxes(title_text="Date", row=1, col=2)
+fig.update_xaxes(title_text="Date", row=1, col=3)
+
+fig.show()

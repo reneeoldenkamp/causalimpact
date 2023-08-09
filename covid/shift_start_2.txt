@@ -1,0 +1,64 @@
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Model & mean_residuals & std_residuals & MAPE & RMSE & MAE & AIC & Run time & mean \\
+\midrule
+CausalImpact & -10.304 & 10.690 & 0.390 & 14.847 & 10.943 & 1203.454 & 0.442 & 12.505 \\
+ARIMAX & 12.205 & 9.626 & 0.574 & 15.544 & 12.671 & 1052.046 & 3650.022 & 35.015 \\
+XGBoost & -15.098 & 11.234 & 0.572 & 18.819 & 15.098 & 0.000 & 0.102 & 33.294 \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lrrr}
+\toprule
+ & coef & std_err & pvalues \\
+Name &  &  &  \\
+\midrule
+sigma2.irregular & 79.239 & 49.453 & 0.109 \\
+sigma2.level & 0.190 & 5982.208 & 1.000 \\
+sigma2.trend & 0.234 & 6.091 & 0.969 \\
+sigma2.freq_seasonal_365(1) & 2.843 & 5993.158 & 1.000 \\
+beta.x1 & -0.019 & 0.211 & 0.928 \\
+beta.x2 & -0.724 & 1.035 & 0.484 \\
+beta.x3 & 0.002 & 0.006 & 0.733 \\
+beta.x4 & 0.076 & 0.128 & 0.550 \\
+beta.x5 & -0.005 & 0.087 & 0.952 \\
+beta.x6 & 0.041 & 0.455 & 0.928 \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lr}
+\toprule
+ & 0 \\
+\midrule
+intercept & 0.305 \\
+FG & 0.006 \\
+TG & -0.159 \\
+Q & 0.001 \\
+DR & 0.001 \\
+RH & -0.002 \\
+UG & 0.097 \\
+ar.L1 & -1.063 \\
+ar.L2 & -0.713 \\
+ma.L1 & -0.298 \\
+ma.L2 & -0.359 \\
+ma.L3 & -0.045 \\
+sigma2 & 10.645 \\
+\bottomrule
+\end{tabular}
+\begin{tabular}{lr}
+\toprule
+ & 0 \\
+\midrule
+intercept & 0.082 \\
+FG & 0.019 \\
+TG & 0.115 \\
+Q & 0.000 \\
+DR & 0.012 \\
+RH & 0.007 \\
+UG & 0.037 \\
+ar.L1 & 0.035 \\
+ar.L2 & 0.041 \\
+ma.L1 & 0.061 \\
+ma.L2 & 0.064 \\
+ma.L3 & 0.076 \\
+sigma2 & 0.502 \\
+\bottomrule
+\end{tabular}

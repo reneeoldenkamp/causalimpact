@@ -74,14 +74,14 @@ def data_loader():
         skipinitialspace=True,
         usecols = ['YYYYMMDD','TG', 'FG', 'Q', 'DR', 'RH', 'UG'])
     df_weather['YYYYMMDD'] = df_weather['YYYYMMDD'].apply(lambda x: pd.to_datetime(str(x), format="%Y%m%d"))
-    df_weather['TG'] = df_weather['TG'].div(10)
+    # df_weather['TG'] = df_weather['TG'].div(10)
     df_weather.rename(columns={"YYYYMMDD":"Date"}, inplace=True)
     df_weather = df_weather.set_index('Date')
 
     df = pd.concat([df_IC, df_weather], axis=1)
     df = df.reset_index()
 
-    mask = (df['Date']>'2020-05-01')&(df['Date']<='2020-12-13')
+    mask = (df['Date']>'2020-03-30')&(df['Date']<='2020-12-13')
     df_second_wave = df.loc[mask]
 
     return df_IC, df_weather, df, df_second_wave
@@ -97,45 +97,50 @@ def data_plot(df):
     """
     lockdown = '2020-10-14'
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x = df['Date'],
-        y = df['FG'],
-        mode = 'lines',
-        name = "Etmaal gemiddelde windsnelheid" ,
-        line = dict(color='orange')))
-    fig.add_trace(go.Scatter(x = df['Date'],
-        y = df['TG'],
-        mode = 'lines',
-        name = "Etmaalgemiddelde temperatuur",
-        line = dict(color='red')))
-    fig.add_trace(go.Scatter(x = df['Date'],
-        y = df['UG'],
-        mode = 'lines',
-        name = "Etmaalgemiddelde relatieve vochtigheid",
-        line = dict(color='gray')))
+    # fig.add_trace(go.Scatter(x = df['Date'],
+    #     y = df['FG'],
+    #     mode = 'lines',
+    #     name = "Etmaal gemiddelde windsnelheid" ,
+    #     line = dict(color='orange')))
+    # fig.add_trace(go.Scatter(x = df['Date'],
+    #     y = df['TG'],
+    #     mode = 'lines',
+    #     name = "Etmaalgemiddelde temperatuur",
+    #     line = dict(color='red')))
+    # fig.add_trace(go.Scatter(x = df['Date'],
+    #     y = df['UG'],
+    #     mode = 'lines',
+    #     name = "Etmaalgemiddelde relatieve vochtigheid",
+    #     line = dict(color='gray')))
     fig.add_trace(go.Scatter(x = df.index,
         y = df['IC_admission'],
         mode = 'lines',
-        name = 'IC admission',
+        name = 'ICU admission',
         line = dict(color='black')))
     fig.add_vline(x=lockdown, line_width=1, line_dash="dash", line_color="blue")
     fig.add_annotation(x=lockdown, y=100, text='2020-10-14: Partial lockdown', showarrow=False, xanchor="center", font=dict(color='blue'))
     fig.add_vline(x='2020-11-04', line_width=1, line_dash="dash", line_color="green")
     fig.add_annotation(x='2020-11-04', y=110, text='2020-11-04: Extra measures', showarrow=False, xanchor='center', font=dict(color='green'))
     fig.add_vline(x='2020-12-14', line_width=1, line_dash="dash", line_color="red")
-    fig.add_annotation(x='2020-12-14', y=120, text='2020-11-14: Strict lockdown', showarrow=False, xanchor='center',
+    fig.add_annotation(x='2020-12-14', y=120, text='2020-12-14: Strict lockdown', showarrow=False, xanchor='center',
                        font=dict(color='red'))
-    fig.add_vline(x='2020-09-01', line_width=1, line_dash="dash", line_color="orange")
-    fig.add_annotation(x='2020-09-01', y=60, text='2020-09-01', showarrow=False, xanchor='center',
+
+    fig.add_vline(x='2020-09-02', line_width=1, line_dash="dash", line_color="orange")
+    fig.add_annotation(x='2020-09-02', y=50, text='2020-09-02', showarrow=False, xanchor='center',
                        font=dict(color='orange'))
     fig.add_vline(x='2020-09-23', line_width=1, line_dash="dash", line_color="orange")
-    fig.add_annotation(x='2020-09-23', y=80, text='2020-09-23', showarrow=False, xanchor='center',
+    fig.add_annotation(x='2020-09-23', y=70, text='2020-09-23', showarrow=False, xanchor='center',
                        font=dict(color='orange'))
-    fig.add_vline(x='2020-09-14', line_width=1, line_dash="dash", line_color="orange")
-    fig.add_annotation(x='2020-09-14', y=70, text='2020-09-14', showarrow=False, xanchor='center',
+    fig.add_vline(x='2020-09-16', line_width=1, line_dash="dash", line_color="orange")
+    fig.add_annotation(x='2020-09-16', y=60, text='2020-09-16', showarrow=False, xanchor='center',
                        font=dict(color='orange'))
     fig.add_vline(x='2020-09-30', line_width=1, line_dash="dash", line_color="orange")
-    fig.add_annotation(x='2020-09-30', y=90, text='2020-09-30', showarrow=False, xanchor='center',
+    fig.add_annotation(x='2020-09-30', y=80, text='2020-09-30', showarrow=False, xanchor='center',
                        font=dict(color='orange'))
+    fig.add_vline(x='2020-10-07', line_width=1, line_dash="dash", line_color="orange")
+    fig.add_annotation(x='2020-10-07', y=90, text='2020-10-07', showarrow=False, xanchor='center',
+                       font=dict(color='orange'))
+
     fig.add_vline(x='2020-02-27', line_width=1, line_dash="dash", line_color="purple")
     fig.add_annotation(x='2020-02-27', y=126, text='2020-02-27', showarrow=False, xanchor='center',
                        font=dict(color='purple'))
@@ -146,25 +151,23 @@ def data_plot(df):
     fig.add_annotation(x='2020-05-01', y=126, text='2020-05-01', showarrow=False, xanchor='center',
                        font=dict(color='purple'))
 
-    fig.add_trace(go.Scatter(x = df['Date'],
-        y = df['RH'],
-        mode = 'lines',
-        name = 'Etmaalsom neerslag',
-        line = dict(color='blue')))
-    fig.add_trace(go.Scatter(x = df['Date'],
-        y = df['DR'],
-        mode = 'lines',
-        name = 'Duur van de neerslag',
-        line = dict(color='green')))
+    # fig.add_trace(go.Scatter(x = df['Date'],
+    #     y = df['RH'],
+    #     mode = 'lines',
+    #     name = 'Etmaalsom neerslag',
+    #     line = dict(color='blue')))
+    # fig.add_trace(go.Scatter(x = df['Date'],
+    #     y = df['DR'],
+    #     mode = 'lines',
+    #     name = 'Duur van de neerslag',
+    #     line = dict(color='green')))
     fig.update_layout(
         title="Covid-19 Data",
         xaxis_title="Date",
-        yaxis_title="Number of new IC admissions",
-        font_family = "Courier New",
+        yaxis_title="Number of new ICU admissions",
         font_size=20,
         font_color  = "black",
-        title_font_family = "Courier New",
-        title_font_size = 38)
+        title_font_size = 30)
     fig.show()
 
 
@@ -180,14 +183,14 @@ def scatter_plot(df, method):
     method: Pearson or Spearson correlation method
     """
     corr = df.corr(method = method)
-    corr_FG = method + " correlation = " + "{:.2f}".format(corr['IC_admission'][2])
-    corr_TG = method + " correlation = " + "{:.2f}".format(corr['IC_admission'][3])
-    corr_Q = method + " correlation = " + "{:.2f}".format(corr['IC_admission'][4])
-    corr_DR = method + " correlation = " + "{:.2f}".format(corr['IC_admission'][5])
-    corr_RH = method + " correlation = " + "{:.2f}".format(corr['IC_admission'][6])
-    corr_UG = method + " correlation = " + "{:.2f}".format(corr['IC_admission'][7])
+    corr_FG = "Pearson correlation = " + "{:.2f}".format(corr['IC_admission'][2])
+    corr_TG = "Pearson correlation = " + "{:.2f}".format(corr['IC_admission'][3])
+    corr_Q = "Pearson correlation = " + "{:.2f}".format(corr['IC_admission'][4])
+    corr_DR = "Pearson correlation = " + "{:.2f}".format(corr['IC_admission'][5])
+    corr_RH = "Pearson correlation = " + "{:.2f}".format(corr['IC_admission'][6])
+    corr_UG = "Pearson correlation = " + "{:.2f}".format(corr['IC_admission'][7])
 
-    fig_2 = make_subplots(rows = 3, cols = 2,
+    fig_2 = make_subplots(rows = 2, cols = 3,
         subplot_titles=(corr_FG, corr_TG, corr_Q, corr_DR, corr_RH, corr_UG))
     fig_2.add_trace(go.Scatter(x = df['IC_admission'],
         y = df['FG'],
@@ -203,45 +206,49 @@ def scatter_plot(df, method):
         y = df['Q'],
         mode = 'markers',
         name = 'Global radiation'),
-        row=2, col=1)
+        row=1, col=3)
     fig_2.add_trace(go.Scatter(x = df['IC_admission'],
         y = df['DR'],
         mode = 'markers',
         name = 'Duration of precipitation'),
-        row=2, col=2)
+        row=2, col=1)
     fig_2.add_trace(go.Scatter(x = df['IC_admission'],
         y = df['RH'],
         mode = 'markers',
         name = '24-hour sum of precipitation'),
-        row=3, col=1)
+        row=2, col=2)
     fig_2.add_trace(go.Scatter(x = df['IC_admission'],
         y = df['UG'],
         mode = 'markers',
         name = '24-hour average relative humidity'),
-        row=3, col=2)
+        row=2, col=3)
     fig_2.update_layout(
-        title="IC admissions vs Weather parameters",
-        font_family = "Courier New",
+        title_text="ICU admissions and weather factors",
         font_color  = "black",
-        title_font_family = "Courier New",
-        title_font_size = 28,
+        title=dict(
+            font_size=35,
+            x=0.5
+        ),
+        font_size = 22,
         showlegend = False)
+    for i in fig_2['layout']['annotations']:
+        i['font'] = dict(size=25)
 
-    fig_2.update_xaxes(title_text="IC admissions", row=1, col=1)
-    fig_2.update_xaxes(title_text="IC admissions", row=1, col=2)
-    fig_2.update_xaxes(title_text="IC admissions", row=2, col=1)
-    fig_2.update_xaxes(title_text="IC admissions", row=2, col=2)
-    fig_2.update_xaxes(title_text="IC admissions", row=3, col=1)
-    fig_2.update_xaxes(title_text="IC admissions", row=3, col=2)
+    fig_2.update_xaxes(title_text="ICU admissions", row=1, col=1)
+    fig_2.update_xaxes(title_text="ICU admissions", row=1, col=2)
+    fig_2.update_xaxes(title_text="ICU admissions", row=1, col=3)
+    fig_2.update_xaxes(title_text="ICU admissions", row=2, col=1)
+    fig_2.update_xaxes(title_text="ICU admissions", row=2, col=2)
+    fig_2.update_xaxes(title_text="ICU admissions", row=2, col=3)
 
-    fig_2.update_yaxes(title_text="24-hour average wind speed", row=1, col=1)
-    fig_2.update_yaxes(title_text="24-hour average temperature", row=1, col=2)
-    fig_2.update_yaxes(title_text="Global raadiation", row=2, col=1)
-    fig_2.update_yaxes(title_text="Duration of precipitation", row=2, col=2)
-    fig_2.update_yaxes(title_text="24-hour sum of precipitation", row=3, col=1)
-    fig_2.update_yaxes(title_text="24-hour average relative humidity", row=3, col=2)
+    fig_2.update_yaxes(title_text="FG: Wind speed", row=1, col=1)
+    fig_2.update_yaxes(title_text="TG: Temperature", row=1, col=2)
+    fig_2.update_yaxes(title_text="Q: Radiation", row=1, col=3)
+    fig_2.update_yaxes(title_text="DR: Duration precipitation", row=2, col=1)
+    fig_2.update_yaxes(title_text="RH: Sum precipitation", row=2, col=2)
+    fig_2.update_yaxes(title_text="UG: Humidity", row=2, col=3)
 
-    # fig_2.show()
+    fig_2.show()
 
 def correlation_matrix(df, method):
     """ Plots a correlation matrix
@@ -254,26 +261,29 @@ def correlation_matrix(df, method):
         Pearson or Spearman correlation metric
 
     """
+    print(df.head())
     corr = df.corr(method = method)
+    corr = corr.round(decimals=2)
     mask = np.triu(np.ones_like(corr, dtype=bool))
     corr = corr.mask(mask)
     fig_3 = px.imshow(corr, text_auto=True,
-        x = ['IC notifications', ' IC admission', 'FG: Wind speed',
-        'TG: temperature', 'Q: radiance', 'DR: time precipitation',
-        'RH: sum precipitation', 'UG: humidity'],
-        y = ['IC notifications', ' IC admission', 'FG: Wind speed',
-        'TG: temperature', 'Q: radiance', 'DR: time precipitation',
-        'RH: sum precipitation', 'UG: humidity'],
+        x = [' ICU admissions', 'FG: Wind speed',
+        'TG: Temperature', 'Q: Radiance', 'DR: Duration precipitation',
+        'RH: Sum precipitation', 'UG: Humidity'],
+        y = [' ICU admissions', 'FG: Wind speed',
+        'TG: Temperature', 'Q: Radiance', 'DR: Duration precipitation',
+        'RH: Sum precipitation', 'UG: Humidity'],
         color_continuous_scale='RdBu')
     fig_3.update_layout(
-        title_text = 'Correlation Matrix, method: '+ method,
+        title_text = 'Correlation Matrix',
         title=dict(
-            font_size = 24,
+            font_size = 35,
             x = 0.5
         ),
+        font_size = 20,
         xaxis_showgrid = False,
         yaxis_showgrid = False)
-    # fig_3.show()
+    fig_3.show()
 
 def run_covid_data_causalimpact(data, data_real, lockdown, int, int_1, end_date, name):
     """
@@ -314,7 +324,7 @@ def run_covid_data_causalimpact(data, data_real, lockdown, int, int_1, end_date,
 
     # Run Causalimpact package to get the model
     start_time = time.time()
-    impact = CausalImpact(data[:end_date], data_real[:end_date], ['2020-05-01', int], [int_1, end_date],
+    impact = CausalImpact(data[:end_date], data_real[:end_date], ['2020-03-30', int], [int_1, end_date],
                           model_args={'level': 'lltrend', 'trend': 'lltrend', 'week_season': True,
                                       'freq_seasonal': [{'period': 365, 'harmonics': 1}], 'exponential': False,
                                       'standardize_data': False, 'data_name': "IC_admission"})
@@ -361,24 +371,28 @@ def run_covid_data_causalimpact(data, data_real, lockdown, int, int_1, end_date,
         y=data_real,
         mode='lines',
         line=dict(color='blue'),
-        name='historic'
+        name='Real data'
     ))
     fig.add_trace(go.Scatter(
         x=x_axis,
         y=predictions,
         mode='lines',
-        name='forecast',
+        name='Forecast',
         line=dict(color='red', dash='dash')
     ))
     fig.add_vline(x=lockdown, line_width=1, line_dash="dash", line_color="black")
     fig.add_vline(x=int, line_width=1, line_dash="dash", line_color="green")
-    fig.add_annotation(x=lockdown, y=150, text='Lockdown', showarrow=False)
-    fig.add_annotation(x=int, y=170, text='Intervention', showarrow=False)
+    fig.add_annotation(x=lockdown, y=105, text='Partial lockdown', showarrow=False)
+    fig.add_annotation(x=int, y=90, text='Begin forecast', showarrow=False)
     fig.update_layout(
-        yaxis_title='number of new IC-admissions',
-        xaxis_title='date',
-        title='Forecast (CausalImpact) of new IC-admissions ',
-        hovermode="x"
+        yaxis_title='Number of new ICU admissions',
+        xaxis_title='Date',
+        title_text='Forecast (BSTS model) of new ICU admissions ',
+        hovermode="x",
+        font_size = 35,
+        title=dict(
+            font_size=45,
+            x=0.5),
     )
     fig.show()
     image_name = "covid/" + name + "CI.png"
@@ -429,24 +443,6 @@ def run_covid_data_ARIMAX(data, data_real, lockdown, int, int_1, name, end_date)
     decomposition = seasonal_decompose(train, model='additive', period=7)
     seasonal = decomposition.seasonal
     train -= seasonal
-    # from pmdarima.datasets import load_lynx
-    # from pmdarima.arima.utils import nsdiffs
-    # # load lynx
-    # lynx = load_lynx()
-    #
-    # # estimate number of seasonal differences using a Canova-Hansen test
-    # D = nsdiffs(lynx,
-    #             m=365,  # commonly requires knowledge of dataset
-    #             max_D=5,
-    #             test='ch')  # -> 0
-    #
-    # # or use the OCSB test (by default)
-    # nsdiffs(lynx,
-    #         m=365,
-    #         max_D=5,
-    #         test='ocsb')  # -> 0
-    # print(D)
-    # breakpoint()
     model = pm.auto_arima(train,
                           start_p=1, start_q=1, start_P=3, start_Q=3,
                           max_p=3, max_q=3, max_P=3, max_Q=3, seasonal=True,
@@ -495,24 +491,28 @@ def run_covid_data_ARIMAX(data, data_real, lockdown, int, int_1, name, end_date)
         y=data_real,
         mode='lines',
         line=dict(color='blue'),
-        name='historic'
+        name='Real data'
     ))
     fig.add_trace(go.Scatter(
         x=x_axis[index_pred:],
         y=predictions,
         mode='lines',
-        name='forecast',
+        name='Forecast',
         line=dict(color='red', dash='dash')
     ))
     fig.add_vline(x=lockdown, line_width=1, line_dash="dash", line_color="black")
     fig.add_vline(x=int, line_width=1, line_dash="dash", line_color="green")
-    fig.add_annotation(x=lockdown, y=150, text='Lockdown', showarrow=False)
-    fig.add_annotation(x=int, y=170, text='Intervention', showarrow=False)
+    fig.add_annotation(x=lockdown, y=70, text='Partial lockdown', showarrow=False)
+    fig.add_annotation(x=int, y=60, text='Begin forecast', showarrow=False)
     fig.update_layout(
-        yaxis_title='number of new IC-admissions',
-        xaxis_title='date',
-        title='Forecast (ARIMAX) of new IC-admissions ',
-        hovermode="x"
+        yaxis_title='Number of new ICU admissions',
+        xaxis_title='Date',
+        title_text='Forecast (ARIMAX model) of new ICU admissions ',
+        hovermode="x",
+        font_size=35,
+        title=dict(
+            font_size=45,
+            x=0.5),
     )
     fig.show()
     image_name = "covid/" + name + "CI.png"
@@ -558,10 +558,6 @@ def run_covid_data_xgb(data, data_real, lockdown, intervention_1, name, end_date
     decomposition = seasonal_decompose(data_diff, model='additive', period=7)
     seasonal = decomposition.seasonal
     data_diff = data_diff - seasonal
-    #
-    # decomposition_2 = seasonal_decompose(data_diff, model='additive', period=365)
-    # seasonal_2 = decomposition_2.seasonal
-    # data_diff -= seasonal_2
 
     # Split data
     exo_train = exo_data[:intervention]
@@ -588,24 +584,28 @@ def run_covid_data_xgb(data, data_real, lockdown, intervention_1, name, end_date
         y=data_real,
         mode='lines',
         line=dict(color='blue'),
-        name='historic'
+        name='Real data'
     ))
     fig.add_trace(go.Scatter(
         x=x_axis[int:],
         y=predictions,
         mode='lines',
-        name='forecast',
+        name='Forecast',
         line=dict(color='red', dash='dash')
     ))
     fig.add_vline(x=lockdown, line_width=1, line_dash="dash", line_color="black")
     fig.add_vline(x=intervention, line_width=1, line_dash="dash", line_color="green")
-    fig.add_annotation(x=lockdown, y=150, text='Lockdown', showarrow=False)
-    fig.add_annotation(x=intervention, y=170, text='Intervention', showarrow=False)
+    fig.add_annotation(x=lockdown, y=150, text='Partial lockdown', showarrow=False)
+    fig.add_annotation(x=intervention, y=170, text='Begin forecast', showarrow=False)
     fig.update_layout(
-        yaxis_title='number of new IC-admissions',
-        xaxis_title='date',
-        title='Forecast (XGBoost) of new IC-admissions ',
-        hovermode="x"
+        yaxis_title='Number of new ICU admissions',
+        xaxis_title='Date',
+        title_text='Forecast (GBDT model) of new ICU admissions ',
+        hovermode="x",
+        font_size=35,
+        title=dict(
+            font_size=45,
+            x=0.5),
     )
     fig.show()
     image_name = "covid/" + name + "CI.png"
@@ -614,30 +614,40 @@ def run_covid_data_xgb(data, data_real, lockdown, intervention_1, name, end_date
 
 
 df_IC, df_weather, df, df_second_wave = data_loader()
-# shift weather data
-df_weather = df_weather.shift(periods=-20, fill_value=0)
-df = pd.concat([df_IC, df_weather], axis=1)
-# data_plot(df[:'2020-11-30'])
-# print(df)
-# df.set_index("Date", inplace=True)
-
-# data_plot(df[:'2020-12-14'])
-# df_second_wave.set_index("Date", inplace=True)
+# scatter_plot(df, 'pearson')
+# # breakpoint()
+# # shift weather data
+# # df_weather = df_weather.shift(periods=-20, fill_value=0)
+# df = pd.concat([df_IC, df_weather], axis=1)
+# # print(df)
+# # df = df[:'2020-12-14']
+# # data_plot(df)
+# # scatter_plot(df, 'pearson')
+# # correlation_matrix(df, 'pearson')
+# # breakpoint()
+# # print(df)
+# # df.set_index("Date", inplace=True)
+#
+# # data_plot(df[:'2020-12-14'])
+df_second_wave.set_index("Date", inplace=True)
 # data_real = df_second_wave['IC_admission']
-# df =df['2020-03-30':'2020-10-14']
-# df = df_second_wave
-df = df['2020-05-01':'2020-11-30']
+# # df =df['2020-03-30':'2020-10-14']
+df = df_second_wave
+df = df['2020-03-30':'2020-11-30']
 data_real = df['IC_admission']
 
 lockdown = '2020-10-14'
-intervention = '2020-10-07'
+intervention = '2020-09-23'
 end_date = '2020-10-14'
-int_1 = '2020-10-08'
+int_1 = '2020-09-24'
 runs = 1
-# name = "shift_real_20days"
+name = "val3_3_seas3_"
 # name = 'shift_seas1_val2'
-name = 'shift_val5_1'
+# name = 'shift_val2_1'
+# name = 'shift_start_1_2'
 lags = 40
+
+mean_real = np.mean(data_real[int_1:])
 
 predictions_ci, data_real, run_time_ci, aic_ci, coef_values, coef_ci, sterr_ci, pvalues_ci = run_covid_data_causalimpact(
     df, data_real, lockdown, intervention, int_1, end_date, name+"_ci.png")
@@ -645,13 +655,9 @@ predictions_ARIMAX, data_real, run_time_ARIMAX, aic_ARIMAX, coef_ARIMAX, sterr_A
     df, data_real, lockdown, intervention, int_1, name+"_ARIMAX.png", end_date)
 predictions_xgb, data_real, feature_importance, run_time_xgb = run_covid_data_xgb(df, data_real, lockdown, intervention, name+"_xgb.png", end_date)
 
-predictions_ci = predictions_ci[int_1:]
-ME_ci, MSE_ci, MAPE_ci, RMSE_ci, MAE_ci = analyse_model(predictions_ci, data_real[:end_date], int_1)
-mean_ci, std_ci = plot_normal_distributed(predictions_ci, data_real[:end_date], 'pre-intervention', int_1)
+prejot_Partial_ACF(predictions_ci, data_real[int_1:end_date], name+"CI", 2)
 
-plot_autocorrelation(predictions_ci, data_real[int_1:end_date], name+"CI", lags)
-plot_Partial_ACF(predictions_ci, data_real[int_1:end_date], name+"CI", 2)
-
+mean_pred_ARIMAX = np.mean(predictions_ARIMAX)
 ME_ARIMAX, MSE_ARIMAX, MAPE_ARIMAX, RMSE_ARIMAX, MAE_ARIMAX = analyse_model(predictions_ARIMAX, data_real[:end_date], int_1)
 mean_ARIMAX, std_ARIMAX = plot_normal_distributed(predictions_ARIMAX, data_real[:end_date], 'pre-intervention', int_1)
 plot_autocorrelation(predictions_ARIMAX, data_real[int_1:end_date], name+"ARIMAX", lags)
@@ -662,6 +668,7 @@ ME_xgb, MSE_xgb, MAPE_xgb, RMSE_xgb, MAE_xgb = analyse_model(predictions_xgb, da
 mean_xgb, std_xgb = plot_normal_distributed(predictions_xgb, data_real[:end_date], 'pre-intervention', int_1)
 plot_autocorrelation(predictions_xgb, data_real[int_1:end_date], name+"xgb", lags)
 plot_Partial_ACF(predictions_xgb, data_real[int_1:end_date], name+"xgb", 2)
+
 #
 # MAPE_ARIMAX, MAPE_xgb = 0, 0
 # RMSE_ARIMAX, RMSE_xgb = 0, 0
@@ -685,6 +692,7 @@ analysis['AIC'] = [aic_ci, aic_ARIMAX, 0]
 # analysis['Beta z score'] = [0,0,0]
 # analysis['Beta P>|z|'] = [pvalues_ci, pvalues_ARIMAX,0]
 analysis['Run time'] = [run_time_ci, run_time_ARIMAX, run_time_xgb]
+analysis['mean'] = [mean_pred_ci, mean_pred_ARIMAX, mean_real]
 
 table = analysis.to_latex(index=False,
                   formatters={"name": str.upper},
@@ -694,6 +702,9 @@ print(table)
 coef_ARIMAX = coef_ARIMAX.to_latex(index=True,
                   formatters={"name": str.upper},
                   float_format="{:.3f}".format,)
+std_err_ARIMAX = sterr_ARIMAX.to_latex(index=True,
+                  formatters={"name": str.upper},
+                  float_format="{:.3f}".format,)
 coef_ci = coef_values.to_latex(index=True,
                   formatters={"name": str.upper},
                   float_format="{:.3f}".format,)
@@ -701,4 +712,5 @@ outF = open("covid/"+name+".txt", "w")
 outF.write(table)
 outF.write(coef_ci)
 outF.write(coef_ARIMAX)
+outF.write(std_err_ARIMAX)
 outF.close()

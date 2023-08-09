@@ -1,4 +1,4 @@
-from load_data import data_loader, correlation_matrix
+from covid_data import data_loader, correlation_matrix
 
 import pandas as pd
 from numpy import array
@@ -26,22 +26,21 @@ def shift_data(shifts, method):
         # Select only correlation with IC-admission
         corr_list.append(corr_matrix['IC_admission'])
 
-    # Make lists for correlation for each weahter index
+    # Make lists for correlation for each weather index
     FG = []
     TG = []
     Q = []
     DR = []
     RH = []
     UG = []
-
     # Add correlation of each lag to each weather index list
     for i in range(len(corr_list)):
-        FG.append(corr_list[i][2])
-        TG.append(corr_list[i][3])
-        Q.append(corr_list[i][4])
-        DR.append(corr_list[i][5])
-        RH.append(corr_list[i][6])
-        UG.append(corr_list[i][7])
+        FG.append(corr_list[i][1])
+        TG.append(corr_list[i][2])
+        Q.append(corr_list[i][3])
+        DR.append(corr_list[i][4])
+        RH.append(corr_list[i][5])
+        UG.append(corr_list[i][6])
 
     # Plot correlation over different shifts
     fig = go.Figure()
@@ -49,47 +48,47 @@ def shift_data(shifts, method):
         x = np.arange(len(FG)),
         y = FG,
         mode = 'lines',
-        name = "Wind speed",
+        name = "FG: Wind speed",
         line = dict(width = 3)))
     fig.add_trace(go.Scatter(
         x = np.arange(len(FG)),
         y = TG,
         mode = 'lines',
-        name = "Temperature",
+        name = "TG: Temperature",
         line = dict(width = 3)))
     fig.add_trace(go.Scatter(
         x = np.arange(len(FG)),
         y = Q,
         mode = 'lines',
-        name = "Radiance",
+        name = "Q: Radiance",
         line = dict(width = 3)))
     fig.add_trace(go.Scatter(
     x = np.arange(len(FG)),
     y = DR,
     mode = 'lines',
-    name = "Time precipitation",
+    name = "DR: Duration precipitation",
     line = dict(width = 3)))
     fig.add_trace(go.Scatter(
         x = np.arange(len(FG)),
         y = RH,
         mode = 'lines',
-        name = "Sum precipitation",
+        name = "RH: Sum precipitation",
         line = dict(width = 3)))
     fig.add_trace(go.Scatter(
         x = np.arange(len(FG)),
         y = UG,
         mode = 'lines',
-        name = "Humidity",
+        name = "UG: Humidity",
         line = dict(width = 3)))
     fig.update_layout(
-        xaxis_title="Shifts",
-        yaxis_title="Correlation",
+        xaxis_title="Lag",
+        yaxis_title="Pearson correlation",
         font_family = "Arial",
         font_color  = "black",
         font_size = 30,
         title=dict(
-            text = 'Correlation IC admission and weather conditions for different shifts',
-            font_size = 38,
+            text = 'Pearson correlation ICU admissions and weather factors for different lags',
+            font_size = 35,
             x = 0.5)
         )
     fig.show()
